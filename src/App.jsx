@@ -25,7 +25,6 @@ export default function App() {
   const handleUnfoldComplete = () => {
     setHasUnfolded(true);
     setAutoPlayMusic(true);
-    // Smoothly reset scroll position to top of unlocked invitation website
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
@@ -60,7 +59,7 @@ export default function App() {
         <div className="petal" style={{ left: '85%', width: '20px', height: '20px', animationDelay: '4.5s' }}></div>
       </div>
 
-      {/* Kashmir Artwork & Chinar Leaf Parallax Background Layers (Active from scrollY = 0) */}
+      {/* Kashmir Artwork & Chinar Leaf Parallax Background Layers */}
       <div className="kashmir-parallax-bg-wrapper">
         <div 
           className="parallax-layer layer-artwork"
@@ -85,7 +84,7 @@ export default function App() {
       </div>
 
       {!hasUnfolded ? (
-        /* One-Way Entrance Envelope Ceremony Stage */
+        /* Sealed 3D Envelope Opening Stage */
         <Envelope onUnfoldComplete={handleUnfoldComplete} />
       ) : (
         /* Permanent Unlocked Invitation Web App (Once unlocked, scrolling to top stays on Hero!) */
@@ -123,11 +122,17 @@ export default function App() {
             </section>
           </main>
 
-          {/* Footer */}
+          {/* Footer with Inline Audio Player & Theme Palette Controls */}
           <footer className="site-footer">
             <div className="footer-monogram font-serif">{weddingConfig.couple.monogram}</div>
             <p className="footer-names">{weddingConfig.couple.groomShort} & {weddingConfig.couple.brideShort}</p>
             <p className="footer-date">{weddingConfig.couple.formattedDate}</p>
+
+            {/* Controls moved to bottom of webpage */}
+            <div className="footer-controls-group">
+              <AudioPlayer autoPlayTrigger={autoPlayMusic} isInline={true} />
+              <ThemeSelector currentTheme={theme} onThemeChange={setTheme} isInline={true} />
+            </div>
 
             <button className="admin-footer-link" onClick={() => setIsAdminOpen(true)}>
               <Lock size={12} />
@@ -136,10 +141,6 @@ export default function App() {
           </footer>
         </div>
       )}
-
-      {/* Floating Audio & Theme Controls */}
-      <AudioPlayer autoPlayTrigger={autoPlayMusic} />
-      <ThemeSelector currentTheme={theme} onThemeChange={setTheme} />
 
       {/* Modals */}
       <RSVPModal isOpen={isRSVPOpen} onClose={() => setIsRSVPOpen(false)} />
@@ -152,14 +153,14 @@ export default function App() {
         }
 
         .invitation-app-fade-in {
-          animation: pageFadeIn 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+          animation: pageFadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
           position: relative;
           z-index: 20;
         }
 
         @keyframes pageFadeIn {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
+          from { opacity: 0; filter: blur(6px); }
+          to { opacity: 1; filter: blur(0); }
         }
 
         /* Kashmir Artwork & Patterns Parallax Background */
@@ -245,7 +246,7 @@ export default function App() {
         }
 
         .main-content-flow {
-          padding-top: 3rem;
+          padding-top: 2rem;
           padding-bottom: 4rem;
         }
 
@@ -263,7 +264,7 @@ export default function App() {
 
         .site-footer {
           text-align: center;
-          padding: 3rem 1rem 5rem 1rem;
+          padding: 3.5rem 1rem 5rem 1rem;
           border-top: 1px solid var(--border-light);
           background: var(--bg-secondary);
         }
@@ -288,6 +289,15 @@ export default function App() {
           color: var(--text-muted);
         }
 
+        .footer-controls-group {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 1rem;
+          margin-top: 2rem;
+          flex-wrap: wrap;
+        }
+
         .admin-footer-link {
           background: transparent;
           border: none;
@@ -296,7 +306,7 @@ export default function App() {
           display: inline-flex;
           align-items: center;
           gap: 0.4rem;
-          margin-top: 1.8rem;
+          margin-top: 2.2rem;
           cursor: pointer;
           transition: color 0.2s ease;
         }

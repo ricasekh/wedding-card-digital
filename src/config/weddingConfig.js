@@ -70,7 +70,7 @@ export const weddingConfig = {
 
   ourStory: [
     {
-      year: "2024",
+      year: "2025",
       title: "First Met",
       description: "A blessed journey that brought two families together in Srinagar.",
       image: `${baseUrl}images/kashmir_mountains.jpg`

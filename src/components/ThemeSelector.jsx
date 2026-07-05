@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Palette, Check } from 'lucide-react';
 
-export const ThemeSelector = ({ currentTheme, onThemeChange }) => {
+export const ThemeSelector = ({ currentTheme, onThemeChange, isInline = false }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const themes = [
@@ -12,7 +12,7 @@ export const ThemeSelector = ({ currentTheme, onThemeChange }) => {
   ];
 
   return (
-    <div className="theme-switcher-wrapper">
+    <div className={isInline ? "theme-inline-wrapper" : "theme-switcher-wrapper"}>
       {isOpen && (
         <div className="theme-menu glass-card">
           <div className="theme-menu-title">Select Theme Style</div>
@@ -36,37 +36,55 @@ export const ThemeSelector = ({ currentTheme, onThemeChange }) => {
       )}
 
       <button 
-        className="audio-floating-btn theme-floating-btn"
+        className={isInline ? "theme-footer-btn" : "audio-floating-btn theme-floating-btn"}
         onClick={() => setIsOpen(!isOpen)}
         title="Change Aesthetic Theme"
         aria-label="Toggle theme selector"
       >
-        <Palette size={20} />
+        <Palette size={16} className="text-gold" />
+        <span>Theme Palette</span>
       </button>
 
       <style>{`
-        .theme-switcher-wrapper {
-          position: fixed;
-          bottom: 2rem;
-          left: 2rem;
-          z-index: 99;
+        .theme-inline-wrapper {
+          position: relative;
+          display: inline-block;
         }
 
-        .theme-floating-btn {
-          position: relative;
-          bottom: 0;
-          left: 0;
+        .theme-footer-btn {
+          background: rgba(26, 22, 20, 0.06);
+          border: 1px solid var(--border-gold);
+          border-radius: 30px;
+          padding: 0.5rem 1.2rem;
+          display: inline-flex;
+          align-items: center;
+          gap: 0.5rem;
+          font-family: var(--font-sans);
+          font-size: 0.75rem;
+          font-weight: 600;
+          letter-spacing: 1px;
+          text-transform: uppercase;
+          color: var(--text-primary);
+          cursor: pointer;
+          transition: all 0.3s ease;
+        }
+
+        .theme-footer-btn:hover {
+          background: var(--bg-card);
+          box-shadow: var(--shadow-sm);
         }
 
         .theme-menu {
           position: absolute;
-          bottom: 70px;
-          left: 0;
+          bottom: 50px;
+          left: 50%;
+          transform: translateX(-50%);
           width: 210px;
           padding: 1rem;
           border-radius: 16px;
           box-shadow: 0 16px 40px rgba(0,0,0,0.25);
           animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+          z-index: 100;
         }
 
         .theme-menu-title {
@@ -113,13 +131,6 @@ export const ThemeSelector = ({ currentTheme, onThemeChange }) => {
         }
 
         .ms-auto { margin-left: auto; }
-
-        @media (max-width: 640px) {
-          .theme-switcher-wrapper {
-            bottom: 1.25rem;
-            left: 1.25rem;
-          }
-        }
       `}</style>
     </div>
   );
