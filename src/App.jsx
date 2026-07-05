@@ -15,19 +15,22 @@ import { weddingConfig } from './config/weddingConfig';
 import { Heart, Lock } from 'lucide-react';
 
 export default function App() {
-  const [isOpened, setIsOpened] = useState(false);
-  const [autoPlayMusic, setAutoPlayMusic] = useState(false);
+  const [isMusicActive, setIsMusicActive] = useState(false);
   const [isRSVPOpen, setIsRSVPOpen] = useState(false);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [theme, setTheme] = useState('maison');
 
-  const handleEnvelopeOpened = () => {
-    setIsOpened(true);
-    setAutoPlayMusic(true);
-  };
-
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
+
+    const handleFirstScroll = () => {
+      if (window.scrollY > 50) {
+        setIsMusicActive(true);
+      }
+    };
+
+    window.addEventListener('scroll', handleFirstScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleFirstScroll);
   }, [theme]);
 
   return (
@@ -41,21 +44,20 @@ export default function App() {
         <div className="petal" style={{ left: '85%', width: '20px', height: '20px', animationDelay: '4.5s' }}></div>
       </div>
 
-      {/* Interactive Envelope Experience (Smooth Fade Out) */}
-      {!isOpened && <Envelope onOpen={handleEnvelopeOpened} />}
+      {/* Header Navigation */}
+      <header className="site-header glass-pill">
+        <div className="header-monogram">{weddingConfig.couple.monogram}</div>
+        <button className="header-rsvp-btn" onClick={() => setIsRSVPOpen(true)}>
+          <Heart size={14} className="text-gold" />
+          <span>RSVP</span>
+        </button>
+      </header>
 
-      {/* Main Digital Invitation Website (Smooth Crossfade Fade In) */}
-      <div className={`invitation-site-wrapper ${isOpened ? 'site-visible' : 'site-hidden'}`}>
-        {/* Header Navigation */}
-        <header className="site-header glass-pill">
-          <div className="header-monogram">{weddingConfig.couple.monogram}</div>
-          <button className="header-rsvp-btn" onClick={() => setIsRSVPOpen(true)}>
-            <Heart size={14} className="text-gold" />
-            <span>RSVP</span>
-          </button>
-        </header>
+      {/* Apple-Style Scroll-Driven 3D Envelope Stage */}
+      <Envelope />
 
-        {/* Main Content Flow */}
+      {/* Main Digital Invitation Website Content Flow */}
+      <div className="invitation-site-flow">
         <main className="main-content-flow">
           <Hero onOpenRSVP={() => setIsRSVPOpen(true)} />
           <OurStory />
@@ -93,7 +95,7 @@ export default function App() {
       </div>
 
       {/* Floating Audio & Theme Controls */}
-      <AudioPlayer autoPlayTrigger={autoPlayMusic} />
+      <AudioPlayer autoPlayTrigger={isMusicActive} />
       <ThemeSelector currentTheme={theme} onThemeChange={setTheme} />
 
       {/* Modals */}
@@ -106,16 +108,10 @@ export default function App() {
           position: relative;
         }
 
-        .invitation-site-wrapper {
-          opacity: 0;
-          visibility: hidden;
-          transition: opacity 1.4s cubic-bezier(0.16, 1, 0.3, 1), visibility 1.4s ease;
-          will-change: opacity;
-        }
-
-        .invitation-site-wrapper.site-visible {
-          opacity: 1;
-          visibility: visible;
+        .invitation-site-flow {
+          position: relative;
+          z-index: 60;
+          margin-top: 100px;
         }
 
         .site-header {
@@ -159,7 +155,7 @@ export default function App() {
         }
 
         .main-content-flow {
-          padding-top: 3rem;
+          padding-top: 2rem;
           padding-bottom: 4rem;
         }
 

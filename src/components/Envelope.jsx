@@ -1,156 +1,226 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import confetti from 'canvas-confetti';
 import { weddingConfig } from '../config/weddingConfig';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, ChevronDown } from 'lucide-react';
 
-export const Envelope = ({ onOpen }) => {
-  const [stage, setStage] = useState('idle');
-  const baseUrl = import.meta.env.BASE_URL || './';
+export const Envelope = () => {
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [hasTriggeredConfetti, setHasTriggeredConfetti] = useState(false);
 
-  const handleOpenEnvelope = (e) => {
-    e.stopPropagation();
-    if (stage !== 'idle') return;
+  useEffect(() => {
+    let ticking = false;
 
-    setStage('cracking');
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          // Total scroll distance dedicated to envelope unfolding stage: 550px
+          const maxScroll = 550;
+          const currentScroll = window.scrollY;
+          const rawProgress = Math.min(Math.max(currentScroll / maxScroll, 0), 1);
 
-    setTimeout(() => {
-      setStage('flap-open');
-    }, 650);
+          setScrollProgress(rawProgress);
 
-    setTimeout(() => {
-      setStage('letter-slide');
+          // Confetti burst when letter slides out (around 65% scroll progress)
+          if (rawProgress > 0.65 && !hasTriggeredConfetti) {
+            setHasTriggeredConfetti(true);
+            confetti({
+              particleCount: 85,
+              spread: 95,
+              origin: { y: 0.5 },
+              colors: ['#D4AF37', '#1B4332', '#1D3557', '#FCF6BA', '#FFF8DC'],
+              disableForReducedMotion: true
+            });
+          }
 
-      confetti({
-        particleCount: 85,
-        spread: 100,
-        origin: { y: 0.5 },
-        colors: ['#D4AF37', '#1B4332', '#1D3557', '#FCF6BA', '#FFF8DC'],
-        disableForReducedMotion: true
-      });
-    }, 3000);
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
 
-    setTimeout(() => {
-      setStage('smooth-fade-out');
-      onOpen();
-    }, 5200);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [hasTriggeredConfetti]);
+
+  // Compute sub-animation progress values (0.0 to 1.0)
+  // 1. Crack Seal: 0% to 20% scroll
+  const crackProgress = Math.min(scrollProgress / 0.20, 1);
+  const sealLeftOffset = -55 * crackProgress;
+  const sealRightOffset = 55 * crackProgress;
+  const sealOpacity = Math.max(1 - crackProgress * 1.5, 0);
+
+  // 2. Rotate Flap 180deg: 15% to 65% scroll
+  const flapProgress = Math.min(Math.max((scrollProgress - 0.15) / 0.50, 0), 1);
+  const flapAngle = 180 * flapProgress;
+
+  // 3. Letter Slide Out: 45% to 90% scroll
+  const letterProgress = Math.min(Math.max((scrollProgress - 0.45) / 0.45, 0), 1);
+  const letterTranslateY = -310 * letterProgress;
+  const letterScale = 1 + (0.06 * letterProgress);
+
+  // 4. Envelope Stage Fade Out: 85% to 100% scroll
+  const fadeProgress = Math.min(Math.max((scrollProgress - 0.85) / 0.15, 0), 1);
+  const stageOpacity = Math.max(1 - fadeProgress, 0);
+
+  const scrollDownToUnfold = () => {
+    window.scrollTo({
+      top: 550,
+      behavior: 'smooth'
+    });
   };
 
+  const baseUrl = import.meta.env.BASE_URL || './';
+
   return (
-    <div className={`envelope-hero-wrapper ${stage}`}>
-      <div className={`envelope-3d-stage ${stage}`}>
-        <div className="envelope-real-box" onClick={handleOpenEnvelope}>
-          
-          {/* Inner Envelope Pocket */}
-          <div className="pocket-back">
-            <div className="pocket-silk-grid"></div>
-            <div className="pocket-monogram font-serif">{weddingConfig.couple.monogram}</div>
-          </div>
+    <div className="apple-scroll-stage-sticky">
+      {/* Scrollable Spacer Track */}
+      <div className="scroll-track-spacer"></div>
 
-          {/* Kashmir Wedding Letter Card (Slides Out) */}
-          <div className={`letter-real-card ${stage}`}>
-            <div className="card-art-header">
-              <img 
-                src={weddingConfig.couple.artwork} 
-                alt="Kashmir Mountains Artwork" 
-                className="art-img"
-              />
-              <div className="art-overlay-fade"></div>
+      {/* Sticky 3D Viewport */}
+      <div 
+        className="envelope-sticky-viewport"
+        style={{ 
+          opacity: stageOpacity,
+          pointerEvents: stageOpacity < 0.1 ? 'none' : 'auto'
+        }}
+      >
+        <div className="envelope-3d-stage">
+          <div className="envelope-real-box" onClick={scrollDownToUnfold}>
+            
+            {/* Inner Pocket */}
+            <div className="pocket-back">
+              <div className="pocket-silk-grid"></div>
+              <div className="pocket-monogram font-serif">{weddingConfig.couple.monogram}</div>
             </div>
 
-            <div className="card-body">
-              <p className="bismillah-text font-serif">
-                {weddingConfig.couple.bismillah}
-              </p>
-
-              <h2 className="hosts-name font-serif text-emerald">
-                {weddingConfig.couple.hosts}
-              </h2>
-
-              <p className="invitation-text font-serif">
-                {weddingConfig.couple.invitationMessage}
-              </p>
-
-              <div className="daughter-title font-script">
-                Daughter
+            {/* Kashmir Wedding Letter Card (Scroll-Controlled 3D Position) */}
+            <div 
+              className="letter-real-card"
+              style={{
+                transform: `translate3d(0, ${letterTranslateY}px, ${letterProgress * 60}px) scale3d(${letterScale}, ${letterScale}, 1)`,
+                boxShadow: `0 ${15 + letterProgress * 30}px ${40 + letterProgress * 60}px rgba(212, 175, 55, ${0.15 + letterProgress * 0.35})`
+              }}
+            >
+              <div className="card-art-header">
+                <img 
+                  src={weddingConfig.couple.artwork} 
+                  alt="Kashmir Mountains Artwork" 
+                  className="art-img"
+                />
+                <div className="art-overlay-fade"></div>
               </div>
 
-              <div className="event-date font-serif text-emerald">
-                {weddingConfig.couple.formattedDate}
-              </div>
+              <div className="card-body">
+                <p className="bismillah-text font-serif">
+                  {weddingConfig.couple.bismillah}
+                </p>
 
-              <div className="event-time font-serif text-blue">
-                {weddingConfig.couple.formattedTime}
-              </div>
+                <h2 className="hosts-name font-serif text-emerald">
+                  {weddingConfig.couple.hosts}
+                </h2>
 
-              <div className="venue-text font-serif text-emerald">
-                {weddingConfig.venues.ceremony.title}, {weddingConfig.venues.ceremony.address}
-              </div>
+                <p className="invitation-text font-serif">
+                  {weddingConfig.couple.invitationMessage}
+                </p>
 
-              <div className="note-text font-serif text-emerald">
-                (For Gents only: Buffet to be served from 12:00 PM to 3:00 PM)
-              </div>
-              <div className="rsvp-text text-blue">
-                RSVP: {weddingConfig.rsvp.whatsappNumber.slice(2)}
-              </div>
-            </div>
-          </div>
+                <div className="daughter-title font-script">
+                  Daughter
+                </div>
 
-          {/* Envelope Side & Bottom Paper Flaps */}
-          <div className="flap-left"></div>
-          <div className="flap-right"></div>
-          <div className="flap-bottom"></div>
+                <div className="event-date font-serif text-emerald">
+                  {weddingConfig.couple.formattedDate}
+                </div>
 
-          {/* Top 3D V-Flap carrying the Photorealistic R&M Wax Seal */}
-          <div className={`flap-top-3d ${stage}`}>
-            <div className="top-flap-shape">
-              <div className="top-flap-gold-line"></div>
-            </div>
+                <div className="event-time font-serif text-blue">
+                  {weddingConfig.couple.formattedTime}
+                </div>
 
-            {/* Photorealistic Wax Seal Positioned Dead-Centered at Top Flap Tip */}
-            <div className={`nano-seal-wrapper ${stage}`}>
-              <div className="seal-drop-shadow-wrapper">
-                <div className="seal-circular-mask">
-                  <img 
-                    src={`${baseUrl}images/real_wax_seal_rm.jpg`} 
-                    alt="Photorealistic R&M Gold Wax Seal" 
-                    className="nano-seal-img"
-                  />
+                <div className="venue-text font-serif text-emerald">
+                  {weddingConfig.venues.ceremony.title}, {weddingConfig.venues.ceremony.address}
+                </div>
+
+                <div className="note-text font-serif text-emerald">
+                  (For Gents only: Buffet to be served from 12:00 PM to 3:00 PM)
+                </div>
+                <div className="rsvp-text text-blue">
+                  RSVP: {weddingConfig.rsvp.whatsappNumber.slice(2)}
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* Tap Instruction Hint */}
-          {stage === 'idle' && (
-            <div className="seal-hint-badge">
-              <Sparkles size={13} className="sparkle-gold" />
-              <span>Tap Wax Seal to Open</span>
+            {/* Side & Bottom Envelope Flaps */}
+            <div className="flap-left"></div>
+            <div className="flap-right"></div>
+            <div className="flap-bottom"></div>
+
+            {/* Top 3D V-Flap (Scroll-Driven rotateX from 0deg to 180deg) */}
+            <div 
+              className="flap-top-3d"
+              style={{
+                transform: `rotateX(${flapAngle}deg)`,
+                zIndex: flapAngle > 90 ? 2 : 6
+              }}
+            >
+              <div className="top-flap-shape">
+                <div className="top-flap-gold-line"></div>
+              </div>
+
+              {/* Photorealistic Wax Seal Positioned Dead-Centered at Top Flap Tip */}
+              <div 
+                className="nano-seal-wrapper"
+                style={{
+                  opacity: sealOpacity,
+                  transform: `translate(-50%, -50%) scale(${1 - crackProgress * 0.1})`
+                }}
+              >
+                <div className="seal-drop-shadow-wrapper">
+                  <div className="seal-circular-mask">
+                    <img 
+                      src={`${baseUrl}images/real_wax_seal_rm.jpg`} 
+                      alt="Photorealistic R&M Gold Wax Seal" 
+                      className="nano-seal-img"
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
-          )}
+
+            {/* Apple Style Scroll Prompt */}
+            {scrollProgress < 0.1 && (
+              <div className="apple-scroll-hint" onClick={scrollDownToUnfold}>
+                <span>Scroll down to open</span>
+                <ChevronDown size={18} className="scroll-chevron" />
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
       <style>{`
-        .envelope-hero-wrapper {
+        .apple-scroll-stage-sticky {
+          position: relative;
           width: 100%;
-          min-height: 100vh;
+        }
+
+        /* 550px Scroll Spacer creating Apple scroll runway */
+        .scroll-track-spacer {
+          height: 600px;
+          pointer-events: none;
+        }
+
+        .envelope-sticky-viewport {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100vw;
+          height: 100vh;
           display: flex;
           align-items: center;
           justify-content: center;
           padding: 2rem 1rem;
           perspective: 2000px;
-          overflow: hidden;
-          transition: opacity 1.2s ease, transform 1.2s ease, filter 1.2s ease;
-          will-change: opacity, transform, filter;
-        }
-
-        .envelope-hero-wrapper.smooth-fade-out {
-          opacity: 0;
-          transform: scale(0.95);
-          filter: blur(10px);
-          pointer-events: none;
-          position: absolute;
-          inset: 0;
+          z-index: 50;
+          will-change: opacity;
         }
 
         .envelope-3d-stage {
@@ -159,7 +229,6 @@ export const Envelope = ({ onOpen }) => {
           max-width: 580px;
           height: 390px;
           transform-style: preserve-3d;
-          will-change: transform;
         }
 
         .envelope-real-box {
@@ -171,13 +240,7 @@ export const Envelope = ({ onOpen }) => {
           box-shadow: 0 35px 90px rgba(26, 22, 20, 0.35), 0 12px 30px rgba(212, 175, 55, 0.2);
           cursor: pointer;
           transform-style: preserve-3d;
-          transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
-          will-change: transform;
-        }
-
-        .envelope-real-box:hover {
-          transform: translate3d(0, -6px, 0) scale3d(1.01, 1.01, 1);
-          box-shadow: 0 45px 110px rgba(212, 175, 55, 0.4);
+          transition: box-shadow 0.4s ease;
         }
 
         /* Pocket */
@@ -216,13 +279,10 @@ export const Envelope = ({ onOpen }) => {
           height: 360px;
           background: #FFFFFF;
           border-radius: 14px;
-          box-shadow: 0 15px 40px rgba(0,0,0,0.14);
           border: 1px solid rgba(212, 175, 55, 0.4);
           overflow: hidden;
           z-index: 3;
           will-change: transform;
-          transition: transform 2.4s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 2.4s ease;
-          transform: translate3d(0, 0, 0);
           backface-visibility: hidden;
         }
 
@@ -263,13 +323,7 @@ export const Envelope = ({ onOpen }) => {
         .text-emerald { color: #1B4332 !important; }
         .text-blue { color: #1D3557 !important; }
 
-        .letter-real-card.letter-slide,
-        .letter-real-card.smooth-fade-out {
-          transform: translate3d(0, -320px, 80px) scale3d(1.06, 1.06, 1);
-          box-shadow: 0 45px 110px rgba(212, 175, 55, 0.5);
-          z-index: 15;
-        }
-
+        /* Envelope Flaps */
         .flap-left {
           position: absolute;
           top: 0;
@@ -320,8 +374,6 @@ export const Envelope = ({ onOpen }) => {
           height: 210px;
           transform-origin: top center;
           transform-style: preserve-3d;
-          transition: transform 2.5s cubic-bezier(0.22, 1, 0.36, 1);
-          z-index: 6;
           will-change: transform;
           backface-visibility: hidden;
         }
@@ -347,24 +399,16 @@ export const Envelope = ({ onOpen }) => {
           background: linear-gradient(90deg, transparent, #D4AF37, transparent);
         }
 
-        .flap-top-3d.flap-open,
-        .flap-top-3d.letter-slide,
-        .flap-top-3d.smooth-fade-out {
-          transform: rotateX(180deg);
-          z-index: 2;
-        }
-
         .nano-seal-wrapper {
           position: absolute;
           top: 210px;
           left: 50%;
-          transform: translate(-50%, -50%);
           width: 106px;
           height: 106px;
           z-index: 25;
           pointer-events: auto;
           transform-style: preserve-3d;
-          transition: transform 1.4s cubic-bezier(0.34, 1.4, 0.64, 1);
+          will-change: opacity, transform;
         }
 
         .seal-drop-shadow-wrapper {
@@ -389,17 +433,8 @@ export const Envelope = ({ onOpen }) => {
           border-radius: 50%;
         }
 
-        .nano-seal-wrapper.cracking {
-          animation: nanoShake 0.5s ease;
-        }
-
-        @keyframes nanoShake {
-          0%, 100% { transform: translate(-50%, -50%) scale(1); }
-          30% { transform: translate(-50%, -50%) scale(1.1) rotate(-5deg); }
-          70% { transform: translate(-50%, -50%) scale(1.1) rotate(5deg); }
-        }
-
-        .seal-hint-badge {
+        /* Apple Style Scroll Hint */
+        .apple-scroll-hint {
           position: absolute;
           bottom: -54px;
           left: 50%;
@@ -418,13 +453,17 @@ export const Envelope = ({ onOpen }) => {
           align-items: center;
           gap: 0.4rem;
           box-shadow: 0 10px 30px rgba(0,0,0,0.35);
-          animation: badgeFloat 2s ease-in-out infinite;
+          cursor: pointer;
           z-index: 30;
         }
 
-        @keyframes badgeFloat {
-          0%, 100% { transform: translate(-50%, 0); }
-          50% { transform: translate(-50%, -6px); }
+        .scroll-chevron {
+          animation: bounceChevron 1.6s ease-in-out infinite;
+        }
+
+        @keyframes bounceChevron {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(4px); }
         }
 
         @media (max-width: 640px) {
