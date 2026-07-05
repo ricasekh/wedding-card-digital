@@ -20,6 +20,7 @@ export default function App() {
   const [isRSVPOpen, setIsRSVPOpen] = useState(false);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [theme, setTheme] = useState('maison');
+  const [scrollY, setScrollY] = useState(0);
 
   const handleEnvelopeComplete = () => {
     setIsOpened(true);
@@ -28,7 +29,23 @@ export default function App() {
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
+
+    let ticking = false;
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          setScrollY(window.scrollY);
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
   }, [theme]);
+
+  const baseUrl = import.meta.env.BASE_URL || './';
 
   return (
     <div className="app-main-container">
@@ -40,6 +57,34 @@ export default function App() {
         <div className="petal" style={{ left: '70%', width: '16px', height: '16px', animationDelay: '1.5s' }}></div>
         <div className="petal" style={{ left: '85%', width: '20px', height: '20px', animationDelay: '4.5s' }}></div>
       </div>
+
+      {/* Kashmir Artwork & Chinar Leaf Parallax Background Layers (Active after opening) */}
+      {isOpened && (
+        <div className="kashmir-parallax-bg-wrapper">
+          {/* Parallax Layer 1: Soft Kashmir Mountain Watercolors */}
+          <div 
+            className="parallax-layer layer-artwork"
+            style={{ transform: `translate3d(0, ${scrollY * 0.18}px, 0)` }}
+          >
+            <img 
+              src={`${baseUrl}images/kashmir_mountains.jpg`} 
+              alt="Kashmir Parallax Background" 
+              className="parallax-artwork-img"
+            />
+          </div>
+
+          {/* Parallax Layer 2: Floating Golden Chinar Leaf & Botanical Motifs */}
+          <div 
+            className="parallax-layer layer-patterns"
+            style={{ transform: `translate3d(0, ${scrollY * 0.35}px, 0)` }}
+          >
+            <div className="chinar-leaf leaf-1">🍁</div>
+            <div className="chinar-leaf leaf-2">🍁</div>
+            <div className="chinar-leaf leaf-3">🍁</div>
+            <div className="chinar-leaf leaf-4">🍁</div>
+          </div>
+        </div>
+      )}
 
       {!isOpened ? (
         /* Sealed 3D Envelope Experience */
@@ -110,12 +155,56 @@ export default function App() {
 
         .invitation-app-fade-in {
           animation: pageFadeIn 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+          position: relative;
+          z-index: 20;
         }
 
         @keyframes pageFadeIn {
           from { opacity: 0; transform: translateY(20px); }
           to { opacity: 1; transform: translateY(0); }
         }
+
+        /* Kashmir Artwork & Patterns Parallax Background */
+        .kashmir-parallax-bg-wrapper {
+          position: fixed;
+          inset: 0;
+          pointer-events: none;
+          z-index: 2;
+          overflow: hidden;
+        }
+
+        .parallax-layer {
+          position: absolute;
+          width: 100%;
+          height: 120%;
+          will-change: transform;
+        }
+
+        .layer-artwork {
+          opacity: 0.15;
+          filter: blur(2px);
+        }
+
+        .parallax-artwork-img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .layer-patterns {
+          opacity: 0.25;
+        }
+
+        .chinar-leaf {
+          position: absolute;
+          font-size: 2.2rem;
+          filter: drop-shadow(0 4px 10px rgba(212, 175, 55, 0.4));
+        }
+
+        .leaf-1 { top: 15%; left: 8%; }
+        .leaf-2 { top: 40%; right: 10%; font-size: 3rem; }
+        .leaf-3 { top: 70%; left: 12%; }
+        .leaf-4 { top: 88%; right: 15%; font-size: 2.5rem; }
 
         .site-header {
           position: fixed;
