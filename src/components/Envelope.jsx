@@ -1,50 +1,101 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import confetti from 'canvas-confetti';
 import { weddingConfig } from '../config/weddingConfig';
-import { Sparkles } from 'lucide-react';
+import { ChevronUp, Sparkles } from 'lucide-react';
 
 export const Envelope = ({ onOpen }) => {
-  const [stage, setStage] = useState('sealed'); 
-  // 'sealed' -> 'cracking' -> 'flap-open' -> 'letter-slide' -> 'unfolded'
+  const [stage, setStage] = useState('sealed');
+  const touchStartY = useRef(null);
 
-  const handleOpenEnvelope = (e) => {
-    e.stopPropagation();
+  const triggerOpen = () => {
     if (stage !== 'sealed') return;
 
     // Stage 1: Crack Seal (0ms - 500ms)
     setStage('cracking');
 
-    // Stage 2: Rotate Top Flap 180deg in 3D (500ms - 2500ms)
+    // Stage 2: Rotate Flap 180deg in 3D (500ms - 2400ms)
     setTimeout(() => {
       setStage('flap-open');
     }, 450);
 
-    // Stage 3: Letter slides out of pocket (2500ms - 4500ms)
+    // Stage 3: Letter slides out of pocket (2400ms - 4400ms)
     setTimeout(() => {
       setStage('letter-slide');
 
       confetti({
-        particleCount: 90,
+        particleCount: 95,
         spread: 100,
         origin: { y: 0.5 },
         colors: ['#D4AF37', '#1B4332', '#1D3557', '#FCF6BA', '#FFF8DC'],
         disableForReducedMotion: true
       });
-    }, 2300);
+    }, 2200);
 
-    // Stage 4: Expand letter & handoff to main app with parallax background
+    // Stage 4: Unfold letter & handoff to main invitation page
     setTimeout(() => {
       setStage('unfolded');
       onOpen();
-    }, 4200);
+    }, 4000);
+  };
+
+  // Swipe Up Touch Gesture Handlers
+  const handleTouchStart = (e) => {
+    if (e.touches && e.touches.length > 0) {
+      touchStartY.current = e.touches[0].clientY;
+    }
+  };
+
+  const handleTouchMove = (e) => {
+    if (!touchStartY.current || stage !== 'sealed') return;
+    const currentY = e.touches[0].clientY;
+    const deltaY = touchStartY.current - currentY; // Positive when swiping UP
+
+    // Swiped up by 40px or more
+    if (deltaY > 40) {
+      touchStartY.current = null;
+      triggerOpen();
+    }
+  };
+
+  // Mouse Drag Up Handlers
+  const handleMouseDown = (e) => {
+    touchStartY.current = e.clientY;
+  };
+
+  const handleMouseMove = (e) => {
+    if (!touchStartY.current || stage !== 'sealed') return;
+    const deltaY = touchStartY.current - e.clientY;
+    if (deltaY > 40) {
+      touchStartY.current = null;
+      triggerOpen();
+    }
+  };
+
+  const handleMouseUp = () => {
+    touchStartY.current = null;
+  };
+
+  // Wheel / Scroll Gesture
+  const handleWheel = (e) => {
+    if (stage === 'sealed' && e.deltaY > 10) {
+      triggerOpen();
+    }
   };
 
   const baseUrl = import.meta.env.BASE_URL || './';
 
   return (
-    <div className={`envelope-hero-stage ${stage}`}>
+    <div 
+      className={`envelope-hero-stage ${stage}`}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+      onWheel={handleWheel}
+    >
       <div className="envelope-3d-container">
-        <div className="envelope-physical-box" onClick={handleOpenEnvelope}>
+        <div className="envelope-physical-box">
           
           {/* Inner Pocket */}
           <div className="pocket-back">
@@ -126,11 +177,11 @@ export const Envelope = ({ onOpen }) => {
             </div>
           </div>
 
-          {/* Tap Prompt Hint */}
+          {/* Swipe Up Prompt Badge */}
           {stage === 'sealed' && (
-            <div className="seal-tap-badge">
-              <Sparkles size={14} className="sparkle-gold" />
-              <span>Tap Wax Seal to Open Invitation</span>
+            <div className="swipe-up-badge" onClick={triggerOpen}>
+              <ChevronUp size={18} className="swipe-up-icon" />
+              <span>Swipe Up to Open Invitation</span>
             </div>
           )}
         </div>
@@ -147,6 +198,8 @@ export const Envelope = ({ onOpen }) => {
           perspective: 2000px;
           overflow: hidden;
           transition: opacity 1s ease, transform 1s ease;
+          user-select: none;
+          touch-action: pan-y;
         }
 
         .envelope-hero-stage.unfolded {
@@ -170,13 +223,17 @@ export const Envelope = ({ onOpen }) => {
           background: #FAF6F0;
           border-radius: 16px;
           box-shadow: 0 35px 90px rgba(26, 22, 20, 0.35), 0 12px 30px rgba(212, 175, 55, 0.2);
-          cursor: pointer;
+          cursor: grab;
           transform-style: preserve-3d;
           transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
         }
 
+        .envelope-physical-box:active {
+          cursor: grabbing;
+        }
+
         .envelope-physical-box:hover {
-          transform: translate3d(0, -6px, 0) scale3d(1.01, 1.01, 1);
+          transform: translate3d(0, -8px, 0) scale3d(1.01, 1.01, 1);
           box-shadow: 0 45px 110px rgba(212, 175, 55, 0.4);
         }
 
@@ -263,7 +320,6 @@ export const Envelope = ({ onOpen }) => {
         .text-emerald { color: #1B4332 !important; }
         .text-blue { color: #1D3557 !important; }
 
-        /* Smooth 60FPS Letter Slide Out */
         .letter-card-inside.letter-slide,
         .letter-card-inside.unfolded {
           transform: translate3d(0, -320px, 80px) scale3d(1.06, 1.06, 1);
@@ -271,7 +327,7 @@ export const Envelope = ({ onOpen }) => {
           z-index: 15;
         }
 
-        /* Front Envelope Flaps */
+        /* Front Flaps */
         .flap-left {
           position: absolute;
           top: 0;
@@ -403,32 +459,39 @@ export const Envelope = ({ onOpen }) => {
           70% { transform: translate(-50%, -50%) scale(1.1) rotate(5deg); }
         }
 
-        .seal-tap-badge {
+        /* Swipe Up Prompt Badge */
+        .swipe-up-badge {
           position: absolute;
-          bottom: -54px;
+          bottom: -56px;
           left: 50%;
           transform: translateX(-50%);
           white-space: nowrap;
-          background: rgba(26, 22, 20, 0.9);
-          backdrop-filter: blur(12px);
-          border: 1px solid rgba(212, 175, 55, 0.7);
+          background: rgba(26, 22, 20, 0.92);
+          backdrop-filter: blur(14px);
+          border: 1px solid rgba(212, 175, 55, 0.75);
           color: #FCF6BA;
           font-size: 0.78rem;
+          font-weight: 600;
           letter-spacing: 1.5px;
           text-transform: uppercase;
-          padding: 0.5rem 1.3rem;
+          padding: 0.55rem 1.4rem;
           border-radius: 50px;
           display: flex;
           align-items: center;
           gap: 0.4rem;
-          box-shadow: 0 10px 30px rgba(0,0,0,0.35);
-          animation: badgeFloat 2s ease-in-out infinite;
+          box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+          animation: bounceUp 1.8s ease-in-out infinite;
           z-index: 30;
+          cursor: pointer;
         }
 
-        @keyframes badgeFloat {
+        .swipe-up-icon {
+          color: #D4AF37;
+        }
+
+        @keyframes bounceUp {
           0%, 100% { transform: translate(-50%, 0); }
-          50% { transform: translate(-50%, -6px); }
+          50% { transform: translate(-50%, -8px); }
         }
 
         @media (max-width: 640px) {
