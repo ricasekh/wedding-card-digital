@@ -4,22 +4,50 @@ import { weddingConfig } from '../config/weddingConfig';
 import { ChevronDown, Sparkles } from 'lucide-react';
 
 export const Envelope = ({ onUnfoldComplete }) => {
-  const [scrollY, setScrollY] = useState(0);
-  const [dragProgress, setDragProgress] = useState(0);
+  const [progress, setProgress] = useState(0);
   const [confettiFired, setConfettiFired] = useState(false);
+  const isCompletingRef = useRef(false);
   const touchStartY = useRef(null);
 
-  // Combine native scroll progress (0 to 1) and drag progress (0 to 1)
-  const totalRunway = 800;
-  const nativeProgress = Math.min(Math.max(scrollY / totalRunway, 0), 1);
-  const rawProgress = Math.min(Math.max(nativeProgress + dragProgress, 0), 1);
+  const startAutoCompletion = () => {
+    if (isCompletingRef.current) return;
+    isCompletingRef.current = true;
+
+    let current = progress;
+    const interval = setInterval(() => {
+      current += 0.04;
+      if (current >= 1) {
+        current = 1;
+        setProgress(1);
+        clearInterval(interval);
+        setTimeout(() => {
+          onUnfoldComplete();
+        }, 300);
+      } else {
+        setProgress(current);
+      }
+    }, 25);
+  };
 
   useEffect(() => {
     let ticking = false;
+
     const handleScroll = () => {
+      if (isCompletingRef.current) return;
+
       if (!ticking) {
         window.requestAnimationFrame(() => {
-          setScrollY(window.scrollY);
+          const currentY = window.scrollY;
+          // Calculate progress over 400px scroll range
+          const calculated = Math.min(Math.max(currentY / 400, 0), 1);
+
+          setProgress(calculated);
+
+          // If user scrolls past 30% threshold, trigger auto-completion to main page
+          if (calculated > 0.30) {
+            startAutoCompletion();
+          }
+
           ticking = false;
         });
         ticking = true;
@@ -28,10 +56,10 @@ export const Envelope = ({ onUnfoldComplete }) => {
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [progress, onUnfoldComplete]);
 
   useEffect(() => {
-    if (rawProgress > 0.65 && !confettiFired) {
+    if (progress > 0.60 && !confettiFired) {
       setConfettiFired(true);
       confetti({
         particleCount: 95,
@@ -42,10 +70,10 @@ export const Envelope = ({ onUnfoldComplete }) => {
       });
     }
 
-    if (rawProgress >= 0.98) {
+    if (progress >= 1 && !isCompletingRef.current) {
       onUnfoldComplete();
     }
-  }, [rawProgress, confettiFired, onUnfoldComplete]);
+  }, [progress, confettiFired, onUnfoldComplete]);
 
   // Touch Swipe & Mouse Drag Handlers
   const handleTouchStart = (e) => {
@@ -55,13 +83,13 @@ export const Envelope = ({ onUnfoldComplete }) => {
   };
 
   const handleTouchMove = (e) => {
-    if (!touchStartY.current) return;
+    if (!touchStartY.current || isCompletingRef.current) return;
     const currentY = e.touches[0].clientY;
-    const deltaY = touchStartY.current - currentY; // Positive when dragging UP
+    const deltaY = touchStartY.current - currentY;
 
-    if (deltaY > 5) {
-      setDragProgress((prev) => Math.min(prev + deltaY / 400, 1));
-      touchStartY.current = currentY;
+    if (deltaY > 15) {
+      touchStartY.current = null;
+      startAutoCompletion();
     }
   };
 
@@ -70,53 +98,43 @@ export const Envelope = ({ onUnfoldComplete }) => {
   };
 
   const handleMouseMove = (e) => {
-    if (!touchStartY.current) return;
+    if (!touchStartY.current || isCompletingRef.current) return;
     const deltaY = touchStartY.current - e.clientY;
-    if (deltaY > 5) {
-      setDragProgress((prev) => Math.min(prev + deltaY / 400, 1));
-      touchStartY.current = e.clientY;
+    if (deltaY > 15) {
+      touchStartY.current = null;
+      startAutoCompletion();
     }
   };
 
-  const handleMouseUp = () => {
-    touchStartY.current = null;
+  const handleWheel = (e) => {
+    if (e.deltaY > 10 && !isCompletingRef.current) {
+      startAutoCompletion();
+    }
   };
 
-  const forceUnfold = () => {
-    // Smooth auto unfold animation
-    let current = dragProgress;
-    const interval = setInterval(() => {
-      current += 0.05;
-      setDragProgress(current);
-      if (current >= 1) {
-        clearInterval(interval);
-      }
-    }, 30);
-  };
-
-  // Sub-animation calculations
+  // Sub-animation calculations (0.0 to 1.0)
   // 1. Crack Seal: 0% to 20%
-  const crackProgress = Math.min(rawProgress / 0.20, 1);
+  const crackProgress = Math.min(progress / 0.20, 1);
   const sealOpacity = Math.max(1 - crackProgress * 1.5, 0);
 
   // 2. Rotate Flap 180°: 10% to 55%
-  const flapProgress = Math.min(Math.max((rawProgress - 0.10) / 0.45, 0), 1);
+  const flapProgress = Math.min(Math.max((progress - 0.10) / 0.45, 0), 1);
   const flapAngle = 180 * flapProgress;
 
   // 3. Letter Slide & Scale: 35% to 85%
-  const letterProgress = Math.min(Math.max((rawProgress - 0.35) / 0.50, 0), 1);
+  const letterProgress = Math.min(Math.max((progress - 0.35) / 0.50, 0), 1);
   const letterTranslateY = -340 * letterProgress;
   const letterScale = 1 + (0.08 * letterProgress);
 
   // 4. Envelope Box Dissolve: 75% to 100%
-  const fadeProgress = Math.min(Math.max((rawProgress - 0.75) / 0.25, 0), 1);
+  const fadeProgress = Math.min(Math.max((progress - 0.75) / 0.25, 0), 1);
   const stageOpacity = Math.max(1 - fadeProgress, 0);
 
   const baseUrl = import.meta.env.BASE_URL || './';
 
   return (
     <div className="entrance-envelope-wrapper">
-      {/* 1000px Scroll Runway Spacer */}
+      {/* 800px Scroll Runway Spacer */}
       <div className="envelope-scroll-track-spacer"></div>
 
       {/* Viewport for 3D Envelope */}
@@ -126,14 +144,14 @@ export const Envelope = ({ onUnfoldComplete }) => {
         onTouchMove={handleTouchMove}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
+        onWheel={handleWheel}
         style={{ 
           opacity: stageOpacity,
           pointerEvents: stageOpacity < 0.05 ? 'none' : 'auto'
         }}
       >
         <div className="envelope-3d-stage">
-          <div className="envelope-real-box" onClick={forceUnfold}>
+          <div className="envelope-real-box" onClick={startAutoCompletion}>
             
             {/* Inner Pocket */}
             <div className="pocket-back">
@@ -233,11 +251,11 @@ export const Envelope = ({ onUnfoldComplete }) => {
               </div>
             </div>
 
-            {/* Scroll / Swipe Prompt Badge */}
-            {rawProgress < 0.10 && (
+            {/* Scroll Prompt Badge */}
+            {progress < 0.10 && (
               <div className="scroll-hint-badge">
                 <Sparkles size={14} className="sparkle-gold" />
-                <span>Scroll or Swipe Up to Open</span>
+                <span>Scroll down to open</span>
                 <ChevronDown size={18} className="scroll-bounce-icon" />
               </div>
             )}
@@ -253,7 +271,7 @@ export const Envelope = ({ onUnfoldComplete }) => {
         }
 
         .envelope-scroll-track-spacer {
-          height: 1000px;
+          height: 800px;
           pointer-events: none;
         }
 
