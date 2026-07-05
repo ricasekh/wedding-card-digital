@@ -4,89 +4,89 @@ import { weddingConfig } from '../config/weddingConfig';
 import { Sparkles } from 'lucide-react';
 
 export const Envelope = ({ onOpen }) => {
-  const [openingStage, setOpeningStage] = useState('idle'); 
-  // 'idle' -> 'cracking' -> 'flap-3d-open' -> 'paper-slide-out' -> 'fullscreen-reveal'
+  const [stage, setStage] = useState('idle'); 
+  // 'idle' -> 'cracking' -> 'opening-flap' -> 'sliding-letter' -> 'expanding-fullscreen'
 
   const handleOpenEnvelope = (e) => {
     e.stopPropagation();
-    if (openingStage !== 'idle') return;
+    if (stage !== 'idle') return;
 
-    // Stage 1: Wax Seal Crack (0ms - 800ms)
-    setOpeningStage('cracking');
+    // Stage 1: Wax Seal Crack (0ms - 600ms)
+    setStage('cracking');
 
-    // Stage 2: Top Flap & Wax Seal rotate together in 3D (800ms - 3200ms)
+    // Stage 2: Top Flap 3D Hinge Flip (600ms - 2600ms)
     setTimeout(() => {
-      setOpeningStage('flap-3d-open');
-    }, 750);
+      setStage('opening-flap');
+    }, 550);
 
-    // Stage 3: Letter paper slides out of pocket & expands (3200ms - 5400ms)
+    // Stage 3: Letter slides out with GPU 3D transform (2600ms - 4600ms)
     setTimeout(() => {
-      setOpeningStage('paper-slide-out');
+      setStage('sliding-letter');
 
       confetti({
-        particleCount: 85,
-        spread: 95,
+        particleCount: 80,
+        spread: 90,
         origin: { y: 0.5 },
         colors: ['#D4AF37', '#1B4332', '#1D3557', '#FCF6BA', '#FFF8DC'],
         disableForReducedMotion: true
       });
-    }, 3000);
+    }, 2400);
 
-    // Stage 4: Smooth transition to fullscreen invitation
+    // Stage 4: Seamless transition to full website view (4600ms - 5800ms)
     setTimeout(() => {
-      setOpeningStage('fullscreen-reveal');
-    }, 5200);
+      setStage('expanding-fullscreen');
+    }, 4400);
 
-    // Stage 5: Final handoff to main app
+    // Stage 5: Finalize handoff to main app
     setTimeout(() => {
       onOpen();
-    }, 6600);
+    }, 5600);
   };
 
   return (
-    <div className="envelope-3d-viewport">
-      <div className={`envelope-stage-box ${openingStage}`}>
-        {/* Main 3D Envelope Body */}
-        <div className="envelope-physical-body" onClick={handleOpenEnvelope}>
-          {/* Inner Pocket Background with Kashmir Motif */}
-          <div className="envelope-pocket-bg">
-            <div className="pocket-silk-texture"></div>
-            <div className="pocket-monogram-gold font-serif">{weddingConfig.couple.monogram}</div>
+    <div className={`envelope-gpu-viewport ${stage}`}>
+      <div className={`envelope-3d-stage ${stage}`}>
+        <div className="envelope-3d-box" onClick={handleOpenEnvelope}>
+          
+          {/* Inner Pocket Lining */}
+          <div className="pocket-back-wall">
+            <div className="pocket-pattern-overlay"></div>
+            <div className="pocket-gold-crest font-serif">{weddingConfig.couple.monogram}</div>
           </div>
 
-          {/* Real Wedding Letter Card (Inside Envelope Pocket) */}
-          <div className={`kashmir-invitation-card ${openingStage}`}>
-            {/* Kashmir Mountains Watercolor Artwork */}
-            <div className="card-artwork-header">
+          {/* Kashmir Wedding Letter Inside Pocket */}
+          <div className={`letter-3d-card ${stage}`}>
+            {/* Kashmir Mountains Artwork */}
+            <div className="letter-header-art">
               <img 
                 src={weddingConfig.couple.artwork} 
                 alt="Kashmir Mountains Watercolor" 
-                className="artwork-img"
+                className="art-img"
               />
-              <div className="artwork-overlay"></div>
+              <div className="art-gradient-fade"></div>
             </div>
 
-            {/* Invitation Text Content matching exact provided card */}
-            <div className="card-body-content">
-              <div className="bismillah-text font-serif">
+            {/* Letter Body Content */}
+            <div className="letter-card-body">
+              <p className="bismillah-text font-serif">
                 {weddingConfig.couple.bismillah}
-              </div>
+              </p>
 
-              <div className="hosts-name font-serif text-emerald">
+              <h2 className="hosts-name font-serif text-emerald">
                 {weddingConfig.couple.hosts}
-              </div>
+              </h2>
 
-              <div className="invitation-request font-serif">
+              <p className="invitation-text font-serif">
                 {weddingConfig.couple.invitationMessage}
-              </div>
+              </p>
 
-              <div className="daughter-title font-script">
+              <div className="daughter-word font-script">
                 Daughter
               </div>
 
-              <div className="on-word font-serif">on</div>
+              <p className="on-text font-serif">on</p>
 
-              <div className="event-day font-serif text-emerald">
+              <div className="event-date font-serif text-emerald">
                 {weddingConfig.couple.formattedDate}
               </div>
 
@@ -94,61 +94,94 @@ export const Envelope = ({ onOpen }) => {
                 {weddingConfig.couple.formattedTime}
               </div>
 
-              <div className="venue-name font-serif text-emerald">
+              <div className="venue-text font-serif text-emerald">
                 {weddingConfig.venues.ceremony.title}, {weddingConfig.venues.ceremony.address}
               </div>
 
-              <div className="notes-box">
-                <p className="note-text text-emerald font-serif">
-                  (For Gents only: Buffet to be served from 12:00 PM to 3:00 PM)
-                </p>
-                <p className="rsvp-text text-blue">
-                  RSVP: {weddingConfig.rsvp.whatsappNumber.slice(2)}
-                </p>
+              <div className="note-box font-serif text-emerald">
+                (For Gents only: Buffet to be served from 12:00 PM to 3:00 PM)
+              </div>
+              <div className="rsvp-phone-text text-blue">
+                RSVP: {weddingConfig.rsvp.whatsappNumber.slice(2)}
               </div>
             </div>
           </div>
 
-          {/* Side & Bottom Envelope Flaps */}
-          <div className="envelope-flap-left"></div>
-          <div className="envelope-flap-right"></div>
-          <div className="envelope-flap-bottom"></div>
+          {/* Left & Right Flaps */}
+          <div className="flap-side-left"></div>
+          <div className="flap-side-right"></div>
+          <div className="flap-side-bottom"></div>
 
-          {/* Top V-shaped Flap that opens in 3D WITH the wax seal attached */}
-          <div className={`envelope-top-flap-3d ${openingStage}`}>
-            <div className="top-flap-outer-shape">
-              <div className="top-flap-gold-line"></div>
-              
-              {/* Wax Seal ATTACHED to the tip of top flap so it opens WITH the flap in 3D! */}
-              <div className={`top-flap-wax-seal ${openingStage}`}>
-                {/* Clean circular seal with 0% background box */}
-                <div className="seal-clip-circle">
-                  <img 
-                    src="/images/real_wax_seal_rm.jpg" 
-                    alt="R & M Wax Seal" 
-                    className="seal-img-clean"
+          {/* Top 3D Flap carrying the 100% Transparent SVG Wax Seal */}
+          <div className={`flap-top-3d ${stage}`}>
+            <div className="top-flap-paper">
+              <div className="top-flap-gold-accent"></div>
+
+              {/* 100% Transparent 3D Metallic Gold SVG Wax Seal */}
+              <div className={`wax-seal-svg-container ${stage}`}>
+                <div className="seal-pulse-glow"></div>
+                
+                <svg viewBox="0 0 100 100" className="wax-seal-svg-element">
+                  <defs>
+                    <radialGradient id="goldWaxGrad" cx="35%" cy="35%" r="65%">
+                      <stop offset="0%" stopColor="#FFF2B2" />
+                      <stop offset="25%" stopColor="#E5C158" />
+                      <stop offset="60%" stopColor="#B38728" />
+                      <stop offset="90%" stopColor="#664606" />
+                      <stop offset="100%" stopColor="#3B2800" />
+                    </radialGradient>
+                    
+                    <filter id="real3dDropShadow" x="-20%" y="-20%" width="140%" height="140%">
+                      <feDropShadow dx="0" dy="5" stdDeviation="4" floodColor="#1A1614" floodOpacity="0.45" />
+                    </filter>
+                  </defs>
+
+                  {/* Organic Melted Wax Outer Shape */}
+                  <path 
+                    d="M 50,4 C 67,2 85,10 92,27 C 99,44 95,66 86,81 C 77,96 56,98 40,94 C 24,90 8,82 4,66 C 0,50 6,32 17,18 C 28,4 33,6 50,4 Z" 
+                    fill="url(#goldWaxGrad)" 
+                    filter="url(#real3dDropShadow)"
                   />
-                  {/* Left Half Split */}
-                  <div className="seal-split-half seal-left-half"></div>
-                  {/* Right Half Split */}
-                  <div className="seal-split-half seal-right-half"></div>
-                </div>
+
+                  {/* Embossed Ring & Laurel Wreath */}
+                  <circle cx="50" cy="50" r="36" fill="none" stroke="#FFF8DC" strokeWidth="1.8" strokeDasharray="3 2" opacity="0.85" />
+                  <circle cx="50" cy="50" r="32" fill="none" stroke="#7A5E0B" strokeWidth="1.5" />
+
+                  {/* Monogram R & M Text */}
+                  <text 
+                    x="50" 
+                    y="57" 
+                    textAnchor="middle" 
+                    fontFamily="Cormorant Garamond, Georgia, serif" 
+                    fontWeight="700" 
+                    fontSize="22" 
+                    fill="#2A1D00"
+                    style={{ textShadow: '0 1px 1px rgba(255,248,220,0.7)' }}
+                  >
+                    R & M
+                  </text>
+                </svg>
+
+                {/* Left Crack Half */}
+                <div className="seal-crack-half crack-left"></div>
+                {/* Right Crack Half */}
+                <div className="seal-crack-half crack-right"></div>
               </div>
             </div>
           </div>
 
           {/* Tap Hint */}
-          {openingStage === 'idle' && (
-            <div className="seal-tap-hint">
+          {stage === 'idle' && (
+            <div className="seal-tap-badge">
               <Sparkles size={13} className="sparkle-gold" />
-              <span>Tap Seal to Open Invitation</span>
+              <span>Tap Wax Seal to Open</span>
             </div>
           )}
         </div>
       </div>
 
       <style>{`
-        .envelope-3d-viewport {
+        .envelope-gpu-viewport {
           width: 100%;
           min-height: 100vh;
           display: flex;
@@ -157,63 +190,69 @@ export const Envelope = ({ onOpen }) => {
           padding: 2rem 1rem;
           perspective: 2000px;
           overflow: hidden;
+          transition: opacity 1s ease, transform 1s ease;
         }
 
-        .envelope-stage-box {
+        .envelope-gpu-viewport.expanding-fullscreen {
+          opacity: 0.95;
+        }
+
+        .envelope-3d-stage {
           position: relative;
           width: 100%;
           max-width: 580px;
           height: 390px;
           transform-style: preserve-3d;
-          transition: transform 2s cubic-bezier(0.16, 1, 0.3, 1);
+          will-change: transform;
         }
 
-        .envelope-physical-body {
+        .envelope-3d-box {
           position: relative;
           width: 100%;
           height: 100%;
           background: #FAF6F0;
           border-radius: 16px;
-          box-shadow: 0 35px 90px rgba(26, 22, 20, 0.35), 0 12px 35px rgba(212, 175, 55, 0.2);
+          box-shadow: 0 30px 80px rgba(26, 22, 20, 0.32), 0 10px 30px rgba(212, 175, 55, 0.2);
           cursor: pointer;
           transform-style: preserve-3d;
-          transition: transform 0.4s ease, box-shadow 0.4s ease;
+          transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
+          will-change: transform;
         }
 
-        .envelope-physical-body:hover {
-          transform: translateY(-6px) scale(1.01);
-          box-shadow: 0 45px 110px rgba(212, 175, 55, 0.4);
+        .envelope-3d-box:hover {
+          transform: translate3d(0, -6px, 0) scale3d(1.01, 1.01, 1);
+          box-shadow: 0 45px 100px rgba(212, 175, 55, 0.35);
         }
 
-        /* Inner Pocket */
-        .envelope-pocket-bg {
+        /* Inner Pocket Backing */
+        .pocket-back-wall {
           position: absolute;
           inset: 0;
           background: #EDE3D5;
           border-radius: 16px;
-          border: 1px solid rgba(212, 175, 55, 0.4);
+          border: 1px solid rgba(212, 175, 55, 0.35);
           overflow: hidden;
           display: flex;
           align-items: center;
           justify-content: center;
         }
 
-        .pocket-silk-texture {
+        .pocket-pattern-overlay {
           position: absolute;
           inset: 0;
-          background-image: radial-gradient(rgba(212, 175, 55, 0.2) 1.5px, transparent 1.5px);
+          background-image: radial-gradient(rgba(212, 175, 55, 0.18) 1.5px, transparent 1.5px);
           background-size: 18px 18px;
         }
 
-        .pocket-monogram-gold {
+        .pocket-gold-crest {
           font-size: 4.5rem;
           font-weight: 700;
-          color: rgba(212, 175, 55, 0.25);
+          color: rgba(212, 175, 55, 0.22);
           letter-spacing: 6px;
         }
 
-        /* Kashmir Watercolor Card inside Pocket */
-        .kashmir-invitation-card {
+        /* Letter inside Pocket (Hardware Accelerated 3D Transform) */
+        .letter-3d-card {
           position: absolute;
           top: 15px;
           left: 4%;
@@ -221,123 +260,69 @@ export const Envelope = ({ onOpen }) => {
           height: 360px;
           background: #FFFFFF;
           border-radius: 14px;
-          box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+          box-shadow: 0 15px 40px rgba(0,0,0,0.12);
           border: 1px solid rgba(212, 175, 55, 0.4);
-          overflow-y: auto;
+          overflow: hidden;
           z-index: 3;
-          transition: transform 2.8s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 2.8s ease, width 2.5s ease, height 2.5s ease;
-          transform: translateY(0);
+          will-change: transform, opacity;
+          transition: transform 2.2s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 2.2s ease;
+          transform: translate3d(0, 0, 0);
+          backface-visibility: hidden;
         }
 
-        .card-artwork-header {
+        .letter-header-art {
           position: relative;
           width: 100%;
-          height: 150px;
+          height: 140px;
           overflow: hidden;
         }
 
-        .artwork-img {
+        .art-img {
           width: 100%;
           height: 100%;
           object-fit: cover;
         }
 
-        .artwork-overlay {
+        .art-gradient-fade {
           position: absolute;
           inset: 0;
           background: linear-gradient(180deg, transparent 50%, #FFFFFF 100%);
         }
 
-        .card-body-content {
-          padding: 1.2rem 1.5rem 2rem 1.5rem;
+        .letter-card-body {
+          padding: 0.8rem 1.4rem 1.8rem 1.4rem;
           text-align: center;
         }
 
-        .bismillah-text {
-          font-size: 0.85rem;
-          color: #1D3557;
-          font-weight: 600;
-          margin-bottom: 0.8rem;
-        }
-
-        .hosts-name {
-          font-size: 1.5rem;
-          font-weight: 700;
-          margin-bottom: 0.4rem;
-        }
-
-        .invitation-request {
-          font-size: 0.95rem;
-          color: #1D3557;
-          max-width: 440px;
-          margin: 0 auto;
-          line-height: 1.4;
-        }
-
-        .daughter-title {
-          font-size: 2.4rem;
-          color: #1D3557;
-          margin: 0.4rem 0 0.1rem 0;
-        }
-
-        .on-word {
-          font-size: 0.85rem;
-          color: #6B5E55;
-          margin-bottom: 0.3rem;
-        }
-
-        .event-day {
-          font-size: 1.5rem;
-          font-weight: 700;
-        }
-
-        .event-time {
-          font-size: 1.2rem;
-          font-weight: 600;
-          margin: 0.2rem 0 0.8rem 0;
-        }
-
-        .venue-name {
-          font-size: 1.25rem;
-          font-weight: 600;
-          line-height: 1.3;
-        }
-
-        .notes-box {
-          margin-top: 1.5rem;
-          padding-top: 1rem;
-          border-top: 1px solid rgba(212, 175, 55, 0.3);
-        }
-
-        .note-text {
-          font-size: 0.85rem;
-          font-style: italic;
-          margin-bottom: 0.4rem;
-        }
-
-        .rsvp-text {
-          font-size: 0.9rem;
-          font-weight: 700;
-        }
+        .bismillah-text { font-size: 0.82rem; color: #1D3557; font-weight: 600; margin-bottom: 0.4rem; }
+        .hosts-name { font-size: 1.4rem; font-weight: 700; margin-bottom: 0.3rem; }
+        .invitation-text { font-size: 0.9rem; color: #1D3557; line-height: 1.35; }
+        .daughter-word { font-size: 2.2rem; color: #1D3557; margin: 0.3rem 0 0.1rem 0; }
+        .on-text { font-size: 0.8rem; color: #6B5E55; }
+        .event-date { font-size: 1.35rem; font-weight: 700; margin-top: 0.2rem; }
+        .event-time { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.4rem; }
+        .venue-text { font-size: 1.1rem; font-weight: 600; }
+        .note-box { font-size: 0.8rem; font-style: italic; margin-top: 0.8rem; }
+        .rsvp-phone-text { font-size: 0.85rem; font-weight: 700; margin-top: 0.3rem; }
 
         .text-emerald { color: #1B4332 !important; }
         .text-blue { color: #1D3557 !important; }
 
-        /* Card Motion Physics: Slides Out and Expands smoothly */
-        .kashmir-invitation-card.paper-slide-out {
-          transform: translateY(-290px) scale(1.04);
-          box-shadow: 0 35px 95px rgba(212, 175, 55, 0.45);
+        /* Smooth 60FPS Letter Slide Out */
+        .letter-3d-card.sliding-letter {
+          transform: translate3d(0, -300px, 60px) scale3d(1.05, 1.05, 1);
+          box-shadow: 0 40px 100px rgba(212, 175, 55, 0.45);
           z-index: 15;
         }
 
-        .kashmir-invitation-card.fullscreen-reveal {
-          transform: translateY(-330px) scale(1.08);
-          box-shadow: 0 45px 120px rgba(212, 175, 55, 0.6);
+        .letter-3d-card.expanding-fullscreen {
+          transform: translate3d(0, -340px, 120px) scale3d(1.12, 1.12, 1);
+          box-shadow: 0 50px 130px rgba(212, 175, 55, 0.6);
           z-index: 25;
         }
 
-        /* Front Envelope Flaps */
-        .envelope-flap-left {
+        /* Front Side & Bottom Flaps */
+        .flap-side-left {
           position: absolute;
           top: 0;
           left: 0;
@@ -348,10 +333,10 @@ export const Envelope = ({ onOpen }) => {
           border-left: 295px solid #F5EFEB;
           border-radius: 16px 0 0 16px;
           z-index: 4;
-          filter: drop-shadow(4px 0 10px rgba(0,0,0,0.08));
+          filter: drop-shadow(4px 0 8px rgba(0,0,0,0.06));
         }
 
-        .envelope-flap-right {
+        .flap-side-right {
           position: absolute;
           top: 0;
           right: 0;
@@ -362,10 +347,10 @@ export const Envelope = ({ onOpen }) => {
           border-right: 295px solid #EFE6DA;
           border-radius: 0 16px 16px 0;
           z-index: 4;
-          filter: drop-shadow(-4px 0 10px rgba(0,0,0,0.08));
+          filter: drop-shadow(-4px 0 8px rgba(0,0,0,0.06));
         }
 
-        .envelope-flap-bottom {
+        .flap-side-bottom {
           position: absolute;
           bottom: 0;
           left: 0;
@@ -376,11 +361,11 @@ export const Envelope = ({ onOpen }) => {
           border-bottom: 205px solid #FAF6F0;
           border-radius: 0 0 16px 16px;
           z-index: 5;
-          filter: drop-shadow(0 -5px 12px rgba(0,0,0,0.1));
+          filter: drop-shadow(0 -5px 10px rgba(0,0,0,0.08));
         }
 
-        /* Top 3D V-Shaped Flap */
-        .envelope-top-flap-3d {
+        /* Top 3D Hinge Flap */
+        .flap-top-3d {
           position: absolute;
           top: 0;
           left: 0;
@@ -388,21 +373,24 @@ export const Envelope = ({ onOpen }) => {
           height: 210px;
           transform-origin: top center;
           transform-style: preserve-3d;
-          transition: transform 2.8s cubic-bezier(0.33, 1, 0.68, 1);
+          transition: transform 2.4s cubic-bezier(0.22, 1, 0.36, 1);
           z-index: 6;
+          will-change: transform;
+          backface-visibility: hidden;
         }
 
-        .top-flap-outer-shape {
+        .top-flap-paper {
           position: relative;
           width: 0;
           height: 0;
           border-left: 290px solid transparent;
           border-right: 290px solid transparent;
           border-top: 210px solid #FAF6F0;
-          filter: drop-shadow(0 8px 20px rgba(0,0,0,0.16));
+          filter: drop-shadow(0 8px 18px rgba(0,0,0,0.14));
+          transform-style: preserve-3d;
         }
 
-        .top-flap-gold-line {
+        .top-flap-gold-accent {
           position: absolute;
           top: -205px;
           left: -280px;
@@ -411,63 +399,69 @@ export const Envelope = ({ onOpen }) => {
           background: linear-gradient(90deg, transparent, #D4AF37, transparent);
         }
 
-        /* 3D Flap Rotates Upward 180deg carrying the Seal WITH IT! */
-        .envelope-top-flap-3d.flap-3d-open,
-        .envelope-top-flap-3d.paper-slide-out,
-        .envelope-top-flap-3d.fullscreen-reveal {
+        /* 3D Flap Rotates 180deg carrying the transparent SVG seal in 3D! */
+        .flap-top-3d.opening-flap,
+        .flap-top-3d.sliding-letter,
+        .flap-top-3d.expanding-fullscreen {
           transform: rotateX(180deg);
           z-index: 2;
         }
 
-        /* Wax Seal ATTACHED to Top Flap Tip (No background box!) */
-        .top-flap-wax-seal {
+        /* 100% Transparent SVG Wax Seal Container (ZERO White Background Box!) */
+        .wax-seal-svg-container {
           position: absolute;
-          top: -25px; /* Positioned exactly at V-apex tip of top flap */
-          left: 50%;
-          transform: translateX(-50%);
-          width: 100px;
-          height: 100px;
-          pointer-events: auto;
+          top: -215px; /* Positioned precisely at V-flap apex tip */
+          left: -48px;
+          width: 96px;
+          height: 96px;
           z-index: 20;
-          transition: transform 1.5s cubic-bezier(0.34, 1.4, 0.64, 1);
+          pointer-events: auto;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transform-style: preserve-3d;
+          transition: transform 1.2s cubic-bezier(0.34, 1.4, 0.64, 1);
         }
 
-        .seal-clip-circle {
-          position: relative;
-          width: 100px;
-          height: 100px;
+        .seal-pulse-glow {
+          position: absolute;
+          inset: -12px;
           border-radius: 50%;
-          overflow: hidden;
-          clip-path: circle(49% at 50% 50%);
-          box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+          background: radial-gradient(circle, rgba(212, 175, 55, 0.5) 0%, transparent 70%);
+          animation: sealGlowAnim 2.2s ease-in-out infinite;
+          pointer-events: none;
         }
 
-        .seal-img-clean {
+        @keyframes sealGlowAnim {
+          0%, 100% { transform: scale(0.92); opacity: 0.6; }
+          50% { transform: scale(1.25); opacity: 0.95; }
+        }
+
+        .wax-seal-svg-element {
           width: 100%;
           height: 100%;
-          object-fit: cover;
-          border-radius: 50%;
+          display: block;
+          filter: drop-shadow(0 8px 20px rgba(0,0,0,0.35));
+          transition: transform 1.2s cubic-bezier(0.34, 1.4, 0.64, 1), opacity 1.2s ease;
         }
 
-        /* Seal crack split animation */
-        .seal-split-half {
-          position: absolute;
-          inset: 0;
-          background: transparent;
-          transition: transform 1.5s ease, opacity 1.5s ease;
+        /* Seal Crack Animation */
+        .wax-seal-svg-container.cracking .wax-seal-svg-element {
+          animation: crackShake 0.5s ease;
         }
 
-        .top-flap-wax-seal.cracking .seal-clip-circle {
-          animation: sealCrackShake 0.6s ease;
-        }
-
-        @keyframes sealCrackShake {
+        @keyframes crackShake {
           0%, 100% { transform: scale(1); }
-          25% { transform: scale(1.08) rotate(-4deg); }
-          75% { transform: scale(1.08) rotate(4deg); }
+          30% { transform: scale(1.1) rotate(-6deg); }
+          70% { transform: scale(1.1) rotate(6deg); }
         }
 
-        .seal-tap-hint {
+        .wax-seal-svg-container.opening-flap .wax-seal-svg-element,
+        .wax-seal-svg-container.sliding-letter .wax-seal-svg-element {
+          opacity: 0.9;
+        }
+
+        .seal-tap-badge {
           position: absolute;
           bottom: -54px;
           left: 50%;
@@ -486,53 +480,49 @@ export const Envelope = ({ onOpen }) => {
           align-items: center;
           gap: 0.4rem;
           box-shadow: 0 10px 30px rgba(0,0,0,0.35);
-          animation: floatHintAnim 2s ease-in-out infinite;
+          animation: hintFloatAnim 2s ease-in-out infinite;
           z-index: 30;
         }
 
-        @keyframes floatHintAnim {
+        @keyframes hintFloatAnim {
           0%, 100% { transform: translate(-50%, 0); }
           50% { transform: translate(-50%, -6px); }
         }
 
         @media (max-width: 640px) {
-          .envelope-stage-box {
+          .envelope-3d-stage {
             max-width: 350px;
             height: 260px;
           }
-          .envelope-flap-left {
+          .flap-side-left {
             border-top-width: 130px;
             border-bottom-width: 130px;
             border-left-width: 180px;
           }
-          .envelope-flap-right {
+          .flap-side-right {
             border-top-width: 130px;
             border-bottom-width: 130px;
             border-right-width: 180px;
           }
-          .envelope-flap-bottom {
+          .flap-side-bottom {
             border-left-width: 175px;
             border-right-width: 175px;
             border-bottom-width: 140px;
           }
-          .envelope-top-flap-3d { height: 140px; }
-          .top-flap-outer-shape {
+          .flap-top-3d { height: 140px; }
+          .top-flap-paper {
             border-left-width: 175px;
             border-right-width: 175px;
             border-top-width: 140px;
           }
-          .top-flap-wax-seal {
-            top: -20px;
+          .wax-seal-svg-container {
+            top: -145px;
+            left: -40px;
             width: 80px;
             height: 80px;
           }
-          .seal-clip-circle {
-            width: 80px;
-            height: 80px;
-          }
-          .kashmir-invitation-card { height: 240px; }
+          .letter-3d-card { height: 240px; }
           .hosts-name { font-size: 1.2rem; }
-          .event-day { font-size: 1.2rem; }
         }
       `}</style>
     </div>
