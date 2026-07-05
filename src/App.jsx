@@ -15,22 +15,19 @@ import { weddingConfig } from './config/weddingConfig';
 import { Heart, Lock } from 'lucide-react';
 
 export default function App() {
-  const [isMusicActive, setIsMusicActive] = useState(false);
+  const [isOpened, setIsOpened] = useState(false);
+  const [autoPlayMusic, setAutoPlayMusic] = useState(false);
   const [isRSVPOpen, setIsRSVPOpen] = useState(false);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [theme, setTheme] = useState('maison');
 
+  const handleEnvelopeComplete = () => {
+    setIsOpened(true);
+    setAutoPlayMusic(true);
+  };
+
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
-
-    const handleFirstScroll = () => {
-      if (window.scrollY > 50) {
-        setIsMusicActive(true);
-      }
-    };
-
-    window.addEventListener('scroll', handleFirstScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleFirstScroll);
   }, [theme]);
 
   return (
@@ -44,58 +41,61 @@ export default function App() {
         <div className="petal" style={{ left: '85%', width: '20px', height: '20px', animationDelay: '4.5s' }}></div>
       </div>
 
-      {/* Header Navigation */}
-      <header className="site-header glass-pill">
-        <div className="header-monogram">{weddingConfig.couple.monogram}</div>
-        <button className="header-rsvp-btn" onClick={() => setIsRSVPOpen(true)}>
-          <Heart size={14} className="text-gold" />
-          <span>RSVP</span>
-        </button>
-      </header>
+      {!isOpened ? (
+        /* Sealed 3D Envelope Experience */
+        <Envelope onComplete={handleEnvelopeComplete} />
+      ) : (
+        /* Full Digital Invitation Web App (Smooth Fade In) */
+        <div className="invitation-app-fade-in">
+          {/* Header Navigation */}
+          <header className="site-header glass-pill">
+            <div className="header-monogram">{weddingConfig.couple.monogram}</div>
+            <button className="header-rsvp-btn" onClick={() => setIsRSVPOpen(true)}>
+              <Heart size={14} className="text-gold" />
+              <span>RSVP</span>
+            </button>
+          </header>
 
-      {/* Apple-Style Scroll-Driven 3D Envelope Stage */}
-      <Envelope />
+          {/* Main Website Sections */}
+          <main className="main-content-flow">
+            <Hero onOpenRSVP={() => setIsRSVPOpen(true)} />
+            <OurStory />
+            <Itinerary />
+            <Venues />
+            <Gallery />
+            <DressCode />
+            <GiftRegistry />
 
-      {/* Main Digital Invitation Website Content Flow */}
-      <div className="invitation-site-flow">
-        <main className="main-content-flow">
-          <Hero onOpenRSVP={() => setIsRSVPOpen(true)} />
-          <OurStory />
-          <Itinerary />
-          <Venues />
-          <Gallery />
-          <DressCode />
-          <GiftRegistry />
+            {/* Bottom RSVP Banner */}
+            <section className="section-padding text-center">
+              <div className="glass-card rsvp-banner">
+                <span className="font-script section-script">We Can't Wait</span>
+                <h2 className="font-serif section-title">Join Us in Srinagar</h2>
+                <p className="rsvp-banner-text">Please confirm your attendance so we can finalize our arrangements.</p>
+                <button className="btn-gold mt-6" onClick={() => setIsRSVPOpen(true)}>
+                  <Heart size={16} />
+                  <span>Confirm RSVP Now</span>
+                </button>
+              </div>
+            </section>
+          </main>
 
-          {/* Bottom RSVP Banner */}
-          <section className="section-padding text-center">
-            <div className="glass-card rsvp-banner">
-              <span className="font-script section-script">We Can't Wait</span>
-              <h2 className="font-serif section-title">Join Us in Srinagar</h2>
-              <p className="rsvp-banner-text">Please confirm your attendance so we can finalize our arrangements.</p>
-              <button className="btn-gold mt-6" onClick={() => setIsRSVPOpen(true)}>
-                <Heart size={16} />
-                <span>Confirm RSVP Now</span>
-              </button>
-            </div>
-          </section>
-        </main>
+          {/* Footer */}
+          <footer className="site-footer">
+            <div className="footer-monogram font-serif">{weddingConfig.couple.monogram}</div>
+            <p className="footer-names">{weddingConfig.couple.groomShort} & {weddingConfig.couple.brideShort}</p>
+            <p className="footer-date">{weddingConfig.couple.formattedDate}</p>
 
-        {/* Footer */}
-        <footer className="site-footer">
-          <div className="footer-monogram font-serif">{weddingConfig.couple.monogram}</div>
-          <p className="footer-names">{weddingConfig.couple.groomShort} & {weddingConfig.couple.brideShort}</p>
-          <p className="footer-date">{weddingConfig.couple.formattedDate}</p>
-
-          <button className="admin-footer-link" onClick={() => setIsAdminOpen(true)}>
-            <Lock size={12} />
-            <span>Couple Admin Login</span>
-          </button>
-        </footer>
-      </div>
+            <button className="admin-footer-link" onClick={() => setIsAdminOpen(true)}>
+              <Lock size={12} />
+              <span>Couple Admin Login</span>
+            </button>
+          </footer>
+        </div>
+      )}
 
       {/* Floating Audio & Theme Controls */}
-      <AudioPlayer autoPlayTrigger={isMusicActive} />
+      <AudioPlayer autoPlayTrigger={autoPlayMusic} />
       <ThemeSelector currentTheme={theme} onThemeChange={setTheme} />
 
       {/* Modals */}
@@ -108,10 +108,13 @@ export default function App() {
           position: relative;
         }
 
-        .invitation-site-flow {
-          position: relative;
-          z-index: 60;
-          margin-top: 100px;
+        .invitation-app-fade-in {
+          animation: pageFadeIn 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes pageFadeIn {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
         }
 
         .site-header {
@@ -155,7 +158,7 @@ export default function App() {
         }
 
         .main-content-flow {
-          padding-top: 2rem;
+          padding-top: 3rem;
           padding-bottom: 4rem;
         }
 
