@@ -5,34 +5,21 @@ import { ChevronDown, Sparkles } from 'lucide-react';
 
 export const Envelope = ({ onUnfoldComplete }) => {
   const [scrollY, setScrollY] = useState(0);
+  const [dragProgress, setDragProgress] = useState(0);
   const [confettiFired, setConfettiFired] = useState(false);
   const touchStartY = useRef(null);
+
+  // Combine native scroll progress (0 to 1) and drag progress (0 to 1)
+  const totalRunway = 800;
+  const nativeProgress = Math.min(Math.max(scrollY / totalRunway, 0), 1);
+  const rawProgress = Math.min(Math.max(nativeProgress + dragProgress, 0), 1);
 
   useEffect(() => {
     let ticking = false;
     const handleScroll = () => {
       if (!ticking) {
         window.requestAnimationFrame(() => {
-          const currentY = window.scrollY;
-          setScrollY(currentY);
-
-          // Trigger confetti when letter slides up
-          if (currentY > 600 && !confettiFired) {
-            setConfettiFired(true);
-            confetti({
-              particleCount: 95,
-              spread: 100,
-              origin: { y: 0.5 },
-              colors: ['#D4AF37', '#1B4332', '#1D3557', '#FCF6BA', '#FFF8DC'],
-              disableForReducedMotion: true
-            });
-          }
-
-          // Complete entrance transition when scrolled past 900px
-          if (currentY >= 900) {
-            onUnfoldComplete();
-          }
-
+          setScrollY(window.scrollY);
           ticking = false;
         });
         ticking = true;
@@ -41,9 +28,26 @@ export const Envelope = ({ onUnfoldComplete }) => {
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [confettiFired, onUnfoldComplete]);
+  }, []);
 
-  // Touch Swipe & Mouse Drag Fallback Handlers
+  useEffect(() => {
+    if (rawProgress > 0.65 && !confettiFired) {
+      setConfettiFired(true);
+      confetti({
+        particleCount: 95,
+        spread: 100,
+        origin: { y: 0.5 },
+        colors: ['#D4AF37', '#1B4332', '#1D3557', '#FCF6BA', '#FFF8DC'],
+        disableForReducedMotion: true
+      });
+    }
+
+    if (rawProgress >= 0.98) {
+      onUnfoldComplete();
+    }
+  }, [rawProgress, confettiFired, onUnfoldComplete]);
+
+  // Touch Swipe & Mouse Drag Handlers
   const handleTouchStart = (e) => {
     if (e.touches && e.touches.length > 0) {
       touchStartY.current = e.touches[0].clientY;
@@ -53,42 +57,58 @@ export const Envelope = ({ onUnfoldComplete }) => {
   const handleTouchMove = (e) => {
     if (!touchStartY.current) return;
     const currentY = e.touches[0].clientY;
-    const deltaY = touchStartY.current - currentY;
+    const deltaY = touchStartY.current - currentY; // Positive when dragging UP
 
-    if (deltaY > 15) {
-      window.scrollBy(0, deltaY * 1.5);
+    if (deltaY > 5) {
+      setDragProgress((prev) => Math.min(prev + deltaY / 400, 1));
       touchStartY.current = currentY;
     }
   };
 
-  const handleWheel = (e) => {
-    if (e.deltaY > 0) {
-      window.scrollBy(0, e.deltaY);
+  const handleMouseDown = (e) => {
+    touchStartY.current = e.clientY;
+  };
+
+  const handleMouseMove = (e) => {
+    if (!touchStartY.current) return;
+    const deltaY = touchStartY.current - e.clientY;
+    if (deltaY > 5) {
+      setDragProgress((prev) => Math.min(prev + deltaY / 400, 1));
+      touchStartY.current = e.clientY;
     }
   };
 
-  const forceUnfold = () => {
-    window.scrollTo({ top: 900, behavior: 'smooth' });
+  const handleMouseUp = () => {
+    touchStartY.current = null;
   };
 
-  // Dedicated 900px scroll distance for envelope unfolding
-  const totalRunway = 900;
-  const rawProgress = Math.min(Math.max(scrollY / totalRunway, 0), 1);
+  const forceUnfold = () => {
+    // Smooth auto unfold animation
+    let current = dragProgress;
+    const interval = setInterval(() => {
+      current += 0.05;
+      setDragProgress(current);
+      if (current >= 1) {
+        clearInterval(interval);
+      }
+    }, 30);
+  };
 
-  // 1. Crack Seal: 0% to 20% scroll
+  // Sub-animation calculations
+  // 1. Crack Seal: 0% to 20%
   const crackProgress = Math.min(rawProgress / 0.20, 1);
   const sealOpacity = Math.max(1 - crackProgress * 1.5, 0);
 
-  // 2. Rotate 3D Flap (0° to 180°): 10% to 55% scroll
+  // 2. Rotate Flap 180°: 10% to 55%
   const flapProgress = Math.min(Math.max((rawProgress - 0.10) / 0.45, 0), 1);
   const flapAngle = 180 * flapProgress;
 
-  // 3. Letter Slide & Scale: 35% to 85% scroll
+  // 3. Letter Slide & Scale: 35% to 85%
   const letterProgress = Math.min(Math.max((rawProgress - 0.35) / 0.50, 0), 1);
   const letterTranslateY = -340 * letterProgress;
   const letterScale = 1 + (0.08 * letterProgress);
 
-  // 4. Envelope Box Dissolve: 75% to 100% scroll
+  // 4. Envelope Box Dissolve: 75% to 100%
   const fadeProgress = Math.min(Math.max((rawProgress - 0.75) / 0.25, 0), 1);
   const stageOpacity = Math.max(1 - fadeProgress, 0);
 
@@ -96,15 +116,17 @@ export const Envelope = ({ onUnfoldComplete }) => {
 
   return (
     <div className="entrance-envelope-wrapper">
-      {/* 1200px Dedicated Entrance Runway Spacer for Window Scrolling */}
+      {/* 1000px Scroll Runway Spacer */}
       <div className="envelope-scroll-track-spacer"></div>
 
-      {/* Fixed Viewport for 3D Envelope Unfolding */}
+      {/* Viewport for 3D Envelope */}
       <div 
         className="envelope-sticky-viewport"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
-        onWheel={handleWheel}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
         style={{ 
           opacity: stageOpacity,
           pointerEvents: stageOpacity < 0.05 ? 'none' : 'auto'
@@ -211,11 +233,11 @@ export const Envelope = ({ onUnfoldComplete }) => {
               </div>
             </div>
 
-            {/* Initial Scroll Prompt */}
+            {/* Scroll / Swipe Prompt Badge */}
             {rawProgress < 0.10 && (
               <div className="scroll-hint-badge">
                 <Sparkles size={14} className="sparkle-gold" />
-                <span>Scroll down to open</span>
+                <span>Scroll or Swipe Up to Open</span>
                 <ChevronDown size={18} className="scroll-bounce-icon" />
               </div>
             )}
@@ -231,7 +253,7 @@ export const Envelope = ({ onUnfoldComplete }) => {
         }
 
         .envelope-scroll-track-spacer {
-          height: 1200px;
+          height: 1000px;
           pointer-events: none;
         }
 
@@ -248,6 +270,7 @@ export const Envelope = ({ onUnfoldComplete }) => {
           perspective: 2000px;
           z-index: 50;
           will-change: opacity, transform;
+          user-select: none;
           touch-action: pan-y;
         }
 
