@@ -5,6 +5,7 @@ import { Sparkles } from 'lucide-react';
 
 export const Envelope = ({ onOpen }) => {
   const [stage, setStage] = useState('idle');
+  const baseUrl = import.meta.env.BASE_URL || './';
 
   const handleOpenEnvelope = (e) => {
     e.stopPropagation();
@@ -110,7 +111,7 @@ export const Envelope = ({ onOpen }) => {
               <div className="seal-drop-shadow-wrapper">
                 <div className="seal-circular-mask">
                   <img 
-                    src="./images/real_wax_seal_rm.jpg" 
+                    src={`${baseUrl}images/real_wax_seal_rm.jpg`} 
                     alt="Photorealistic R&M Gold Wax Seal" 
                     className="nano-seal-img"
                   />
