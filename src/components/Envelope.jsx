@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import confetti from 'canvas-confetti';
 import { weddingConfig } from '../config/weddingConfig';
 import { ChevronDown, Sparkles } from 'lucide-react';
@@ -6,6 +6,7 @@ import { ChevronDown, Sparkles } from 'lucide-react';
 export const Envelope = ({ onUnfoldComplete }) => {
   const [scrollY, setScrollY] = useState(0);
   const [confettiFired, setConfettiFired] = useState(false);
+  const touchStartY = useRef(null);
 
   useEffect(() => {
     let ticking = false;
@@ -16,7 +17,7 @@ export const Envelope = ({ onUnfoldComplete }) => {
           setScrollY(currentY);
 
           // Trigger confetti when letter slides up
-          if (currentY > 700 && !confettiFired) {
+          if (currentY > 600 && !confettiFired) {
             setConfettiFired(true);
             confetti({
               particleCount: 95,
@@ -27,8 +28,8 @@ export const Envelope = ({ onUnfoldComplete }) => {
             });
           }
 
-          // Complete entrance transition at 1000px scroll
-          if (currentY >= 1000) {
+          // Complete entrance transition when scrolled past 900px
+          if (currentY >= 900) {
             onUnfoldComplete();
           }
 
@@ -42,20 +43,48 @@ export const Envelope = ({ onUnfoldComplete }) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [confettiFired, onUnfoldComplete]);
 
-  // Total scroll distance dedicated to envelope unfolding: 1000px
-  const totalRunway = 1000;
+  // Touch Swipe & Mouse Drag Fallback Handlers
+  const handleTouchStart = (e) => {
+    if (e.touches && e.touches.length > 0) {
+      touchStartY.current = e.touches[0].clientY;
+    }
+  };
+
+  const handleTouchMove = (e) => {
+    if (!touchStartY.current) return;
+    const currentY = e.touches[0].clientY;
+    const deltaY = touchStartY.current - currentY;
+
+    if (deltaY > 15) {
+      window.scrollBy(0, deltaY * 1.5);
+      touchStartY.current = currentY;
+    }
+  };
+
+  const handleWheel = (e) => {
+    if (e.deltaY > 0) {
+      window.scrollBy(0, e.deltaY);
+    }
+  };
+
+  const forceUnfold = () => {
+    window.scrollTo({ top: 900, behavior: 'smooth' });
+  };
+
+  // Dedicated 900px scroll distance for envelope unfolding
+  const totalRunway = 900;
   const rawProgress = Math.min(Math.max(scrollY / totalRunway, 0), 1);
 
   // 1. Crack Seal: 0% to 20% scroll
   const crackProgress = Math.min(rawProgress / 0.20, 1);
   const sealOpacity = Math.max(1 - crackProgress * 1.5, 0);
 
-  // 2. Rotate 3D Flap (0° to 180°): 12% to 60% scroll
-  const flapProgress = Math.min(Math.max((rawProgress - 0.12) / 0.48, 0), 1);
+  // 2. Rotate 3D Flap (0° to 180°): 10% to 55% scroll
+  const flapProgress = Math.min(Math.max((rawProgress - 0.10) / 0.45, 0), 1);
   const flapAngle = 180 * flapProgress;
 
-  // 3. Letter Slide & Scale: 40% to 90% scroll
-  const letterProgress = Math.min(Math.max((rawProgress - 0.40) / 0.50, 0), 1);
+  // 3. Letter Slide & Scale: 35% to 85% scroll
+  const letterProgress = Math.min(Math.max((rawProgress - 0.35) / 0.50, 0), 1);
   const letterTranslateY = -340 * letterProgress;
   const letterScale = 1 + (0.08 * letterProgress);
 
@@ -65,18 +94,17 @@ export const Envelope = ({ onUnfoldComplete }) => {
 
   const baseUrl = import.meta.env.BASE_URL || './';
 
-  const forceUnfold = () => {
-    window.scrollTo({ top: 1000, behavior: 'smooth' });
-  };
-
   return (
     <div className="entrance-envelope-wrapper">
-      {/* 1000px Dedicated Entrance Runway Spacer */}
+      {/* 1200px Dedicated Entrance Runway Spacer for Window Scrolling */}
       <div className="envelope-scroll-track-spacer"></div>
 
       {/* Fixed Viewport for 3D Envelope Unfolding */}
       <div 
         className="envelope-sticky-viewport"
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onWheel={handleWheel}
         style={{ 
           opacity: stageOpacity,
           pointerEvents: stageOpacity < 0.05 ? 'none' : 'auto'
@@ -203,7 +231,7 @@ export const Envelope = ({ onUnfoldComplete }) => {
         }
 
         .envelope-scroll-track-spacer {
-          height: 1000px;
+          height: 1200px;
           pointer-events: none;
         }
 
@@ -220,6 +248,7 @@ export const Envelope = ({ onUnfoldComplete }) => {
           perspective: 2000px;
           z-index: 50;
           will-change: opacity, transform;
+          touch-action: pan-y;
         }
 
         .envelope-3d-stage {
