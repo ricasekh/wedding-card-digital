@@ -1,66 +1,89 @@
 import React, { useState, useEffect } from 'react';
 import confetti from 'canvas-confetti';
 import { weddingConfig } from '../config/weddingConfig';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Sparkles } from 'lucide-react';
 
-export const Envelope = ({ scrollY }) => {
+export const Envelope = ({ onUnfoldComplete }) => {
+  const [scrollY, setScrollY] = useState(0);
   const [confettiFired, setConfettiFired] = useState(false);
 
-  // Dedicated 1100px scroll distance for continuous 3D unfolding
-  const totalRunway = 1100;
+  useEffect(() => {
+    let ticking = false;
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const currentY = window.scrollY;
+          setScrollY(currentY);
+
+          // Trigger confetti when letter slides up
+          if (currentY > 700 && !confettiFired) {
+            setConfettiFired(true);
+            confetti({
+              particleCount: 95,
+              spread: 100,
+              origin: { y: 0.5 },
+              colors: ['#D4AF37', '#1B4332', '#1D3557', '#FCF6BA', '#FFF8DC'],
+              disableForReducedMotion: true
+            });
+          }
+
+          // Complete entrance transition at 1000px scroll
+          if (currentY >= 1000) {
+            onUnfoldComplete();
+          }
+
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [confettiFired, onUnfoldComplete]);
+
+  // Total scroll distance dedicated to envelope unfolding: 1000px
+  const totalRunway = 1000;
   const rawProgress = Math.min(Math.max(scrollY / totalRunway, 0), 1);
 
-  useEffect(() => {
-    if (rawProgress > 0.68 && !confettiFired) {
-      setConfettiFired(true);
-      confetti({
-        particleCount: 90,
-        spread: 100,
-        origin: { y: 0.5 },
-        colors: ['#D4AF37', '#1B4332', '#1D3557', '#FCF6BA', '#FFF8DC'],
-        disableForReducedMotion: true
-      });
-    }
-  }, [rawProgress, confettiFired]);
+  // 1. Crack Seal: 0% to 20% scroll
+  const crackProgress = Math.min(rawProgress / 0.20, 1);
+  const sealOpacity = Math.max(1 - crackProgress * 1.5, 0);
 
-  // Continuous Sub-animation Progress Calculations (0.0 to 1.0)
-  // 1. Seal Crack & Fade: 0% to 18% scroll
-  const crackProgress = Math.min(rawProgress / 0.18, 1);
-  const sealOpacity = Math.max(1 - crackProgress * 1.4, 0);
-
-  // 2. Continuous 3D Top Flap Rotation (0° to 180°): 10% to 55% scroll
-  const flapProgress = Math.min(Math.max((rawProgress - 0.10) / 0.45, 0), 1);
+  // 2. Rotate 3D Flap (0° to 180°): 12% to 60% scroll
+  const flapProgress = Math.min(Math.max((rawProgress - 0.12) / 0.48, 0), 1);
   const flapAngle = 180 * flapProgress;
 
-  // 3. Continuous Letter Slide & Scale: 35% to 85% scroll
-  const letterProgress = Math.min(Math.max((rawProgress - 0.35) / 0.50, 0), 1);
+  // 3. Letter Slide & Scale: 40% to 90% scroll
+  const letterProgress = Math.min(Math.max((rawProgress - 0.40) / 0.50, 0), 1);
   const letterTranslateY = -340 * letterProgress;
-  const letterScale = 1 + (0.07 * letterProgress);
+  const letterScale = 1 + (0.08 * letterProgress);
 
-  // 4. Smooth Morph Dissolve Transition: 75% to 100% scroll
+  // 4. Envelope Box Dissolve: 75% to 100% scroll
   const fadeProgress = Math.min(Math.max((rawProgress - 0.75) / 0.25, 0), 1);
   const stageOpacity = Math.max(1 - fadeProgress, 0);
-  const stageBlur = fadeProgress * 14; // Smooth gaussian blur dissolve
 
   const baseUrl = import.meta.env.BASE_URL || './';
 
+  const forceUnfold = () => {
+    window.scrollTo({ top: 1000, behavior: 'smooth' });
+  };
+
   return (
-    <div className="continuous-envelope-hero-wrapper">
-      {/* 1100px Scroll Spacer creating fluid scroll track */}
+    <div className="entrance-envelope-wrapper">
+      {/* 1000px Dedicated Entrance Runway Spacer */}
       <div className="envelope-scroll-track-spacer"></div>
 
-      {/* Sticky 3D Envelope Viewport */}
+      {/* Fixed Viewport for 3D Envelope Unfolding */}
       <div 
         className="envelope-sticky-viewport"
         style={{ 
           opacity: stageOpacity,
-          filter: `blur(${stageBlur}px)`,
-          transform: `scale(${1 - fadeProgress * 0.05})`,
           pointerEvents: stageOpacity < 0.05 ? 'none' : 'auto'
         }}
       >
         <div className="envelope-3d-stage">
-          <div className="envelope-real-box">
+          <div className="envelope-real-box" onClick={forceUnfold}>
             
             {/* Inner Pocket */}
             <div className="pocket-back">
@@ -68,7 +91,7 @@ export const Envelope = ({ scrollY }) => {
               <div className="pocket-monogram font-serif">{weddingConfig.couple.monogram}</div>
             </div>
 
-            {/* Kashmir Wedding Letter Card (Scroll-Controlled 3D Position) */}
+            {/* Kashmir Wedding Letter Card */}
             <div 
               className="letter-real-card"
               style={{
@@ -128,7 +151,7 @@ export const Envelope = ({ scrollY }) => {
             <div className="flap-right"></div>
             <div className="flap-bottom"></div>
 
-            {/* Top 3D V-Flap (RotateX from 0deg to 180deg continuously) */}
+            {/* Top 3D V-Flap */}
             <div 
               className="flap-top-3d"
               style={{
@@ -163,6 +186,7 @@ export const Envelope = ({ scrollY }) => {
             {/* Initial Scroll Prompt */}
             {rawProgress < 0.10 && (
               <div className="scroll-hint-badge">
+                <Sparkles size={14} className="sparkle-gold" />
                 <span>Scroll down to open</span>
                 <ChevronDown size={18} className="scroll-bounce-icon" />
               </div>
@@ -172,13 +196,14 @@ export const Envelope = ({ scrollY }) => {
       </div>
 
       <style>{`
-        .continuous-envelope-hero-wrapper {
+        .entrance-envelope-wrapper {
           position: relative;
           width: 100%;
+          z-index: 40;
         }
 
         .envelope-scroll-track-spacer {
-          height: 1100px;
+          height: 1000px;
           pointer-events: none;
         }
 
@@ -194,8 +219,7 @@ export const Envelope = ({ scrollY }) => {
           padding: 2rem 1rem;
           perspective: 2000px;
           z-index: 50;
-          will-change: opacity, filter, transform;
-          transition: filter 0.2s ease, opacity 0.2s ease;
+          will-change: opacity, transform;
         }
 
         .envelope-3d-stage {
@@ -214,6 +238,7 @@ export const Envelope = ({ scrollY }) => {
           border-radius: 16px;
           box-shadow: 0 35px 90px rgba(26, 22, 20, 0.35), 0 12px 30px rgba(212, 175, 55, 0.2);
           transform-style: preserve-3d;
+          cursor: pointer;
         }
 
         /* Inner Pocket */
@@ -412,7 +437,7 @@ export const Envelope = ({ scrollY }) => {
           left: 50%;
           transform: translateX(-50%);
           white-space: nowrap;
-          background: rgba(26, 22, 20, 0.9);
+          background: rgba(26, 22, 20, 0.92);
           backdrop-filter: blur(12px);
           border: 1px solid rgba(212, 175, 55, 0.7);
           color: #FCF6BA;
@@ -427,6 +452,8 @@ export const Envelope = ({ scrollY }) => {
           box-shadow: 0 10px 30px rgba(0,0,0,0.35);
           z-index: 30;
         }
+
+        .sparkle-gold { color: #D4AF37; }
 
         .scroll-bounce-icon {
           animation: bounceIcon 1.6s ease-in-out infinite;

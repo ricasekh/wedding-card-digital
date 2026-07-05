@@ -15,11 +15,19 @@ import { weddingConfig } from './config/weddingConfig';
 import { Heart, Lock } from 'lucide-react';
 
 export default function App() {
+  const [hasUnfolded, setHasUnfolded] = useState(false);
   const [scrollY, setScrollY] = useState(0);
   const [autoPlayMusic, setAutoPlayMusic] = useState(false);
   const [isRSVPOpen, setIsRSVPOpen] = useState(false);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [theme, setTheme] = useState('maison');
+
+  const handleUnfoldComplete = () => {
+    setHasUnfolded(true);
+    setAutoPlayMusic(true);
+    // Smoothly reset scroll position to top of unlocked invitation website
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  };
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -28,13 +36,7 @@ export default function App() {
     const handleScroll = () => {
       if (!ticking) {
         window.requestAnimationFrame(() => {
-          const currentY = window.scrollY;
-          setScrollY(currentY);
-
-          if (currentY > 100 && !autoPlayMusic) {
-            setAutoPlayMusic(true);
-          }
-
+          setScrollY(window.scrollY);
           ticking = false;
         });
         ticking = true;
@@ -43,7 +45,7 @@ export default function App() {
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [theme, autoPlayMusic]);
+  }, [theme]);
 
   const baseUrl = import.meta.env.BASE_URL || './';
 
@@ -60,7 +62,6 @@ export default function App() {
 
       {/* Kashmir Artwork & Chinar Leaf Parallax Background Layers (Active from scrollY = 0) */}
       <div className="kashmir-parallax-bg-wrapper">
-        {/* Parallax Layer 1: Soft Kashmir Mountain Watercolors */}
         <div 
           className="parallax-layer layer-artwork"
           style={{ transform: `translate3d(0, ${scrollY * 0.18}px, 0)` }}
@@ -72,7 +73,6 @@ export default function App() {
           />
         </div>
 
-        {/* Parallax Layer 2: Floating Golden Chinar Leaf & Botanical Motifs */}
         <div 
           className="parallax-layer layer-patterns"
           style={{ transform: `translate3d(0, ${scrollY * 0.35}px, 0)` }}
@@ -84,61 +84,58 @@ export default function App() {
         </div>
       </div>
 
-      {/* Header Navigation Bar */}
-      <header 
-        className="site-header glass-pill"
-        style={{ 
-          opacity: Math.min(Math.max((scrollY - 600) / 300, 0), 1),
-          pointerEvents: scrollY > 600 ? 'auto' : 'none'
-        }}
-      >
-        <div className="header-monogram">{weddingConfig.couple.monogram}</div>
-        <button className="header-rsvp-btn" onClick={() => setIsRSVPOpen(true)}>
-          <Heart size={14} className="text-gold" />
-          <span>RSVP</span>
-        </button>
-      </header>
+      {!hasUnfolded ? (
+        /* One-Way Entrance Envelope Ceremony Stage */
+        <Envelope onUnfoldComplete={handleUnfoldComplete} />
+      ) : (
+        /* Permanent Unlocked Invitation Web App (Once unlocked, scrolling to top stays on Hero!) */
+        <div className="invitation-app-fade-in">
+          {/* Header Navigation Bar */}
+          <header className="site-header glass-pill">
+            <div className="header-monogram">{weddingConfig.couple.monogram}</div>
+            <button className="header-rsvp-btn" onClick={() => setIsRSVPOpen(true)}>
+              <Heart size={14} className="text-gold" />
+              <span>RSVP</span>
+            </button>
+          </header>
 
-      {/* Continuous 100% Scroll-Driven 3D Envelope Stage */}
-      <Envelope scrollY={scrollY} />
+          {/* Main Website Sections */}
+          <main className="main-content-flow">
+            <Hero onOpenRSVP={() => setIsRSVPOpen(true)} />
+            <OurStory />
+            <Itinerary />
+            <Venues />
+            <Gallery />
+            <DressCode />
+            <GiftRegistry />
 
-      {/* Full Digital Invitation Web App Content Flow */}
-      <div className="invitation-site-flow">
-        <main className="main-content-flow">
-          <Hero onOpenRSVP={() => setIsRSVPOpen(true)} />
-          <OurStory />
-          <Itinerary />
-          <Venues />
-          <Gallery />
-          <DressCode />
-          <GiftRegistry />
+            {/* Bottom RSVP Banner */}
+            <section className="section-padding text-center">
+              <div className="glass-card rsvp-banner">
+                <span className="font-script section-script">We Can't Wait</span>
+                <h2 className="font-serif section-title">Join Us in Srinagar</h2>
+                <p className="rsvp-banner-text">Please confirm your attendance so we can finalize our arrangements.</p>
+                <button className="btn-gold mt-6" onClick={() => setIsRSVPOpen(true)}>
+                  <Heart size={16} />
+                  <span>Confirm RSVP Now</span>
+                </button>
+              </div>
+            </section>
+          </main>
 
-          {/* Bottom RSVP Banner */}
-          <section className="section-padding text-center">
-            <div className="glass-card rsvp-banner">
-              <span className="font-script section-script">We Can't Wait</span>
-              <h2 className="font-serif section-title">Join Us in Srinagar</h2>
-              <p className="rsvp-banner-text">Please confirm your attendance so we can finalize our arrangements.</p>
-              <button className="btn-gold mt-6" onClick={() => setIsRSVPOpen(true)}>
-                <Heart size={16} />
-                <span>Confirm RSVP Now</span>
-              </button>
-            </div>
-          </section>
-        </main>
+          {/* Footer */}
+          <footer className="site-footer">
+            <div className="footer-monogram font-serif">{weddingConfig.couple.monogram}</div>
+            <p className="footer-names">{weddingConfig.couple.groomShort} & {weddingConfig.couple.brideShort}</p>
+            <p className="footer-date">{weddingConfig.couple.formattedDate}</p>
 
-        {/* Footer */}
-        <footer className="site-footer">
-          <div className="footer-monogram font-serif">{weddingConfig.couple.monogram}</div>
-          <p className="footer-names">{weddingConfig.couple.groomShort} & {weddingConfig.couple.brideShort}</p>
-          <p className="footer-date">{weddingConfig.couple.formattedDate}</p>
-
-          <button className="admin-footer-link" onClick={() => setIsAdminOpen(true)}>
-            <Lock size={12} />
-            <span>Couple Admin Login</span>
-          </button>
-        </footer>
-      </div>
+            <button className="admin-footer-link" onClick={() => setIsAdminOpen(true)}>
+              <Lock size={12} />
+              <span>Couple Admin Login</span>
+            </button>
+          </footer>
+        </div>
+      )}
 
       {/* Floating Audio & Theme Controls */}
       <AudioPlayer autoPlayTrigger={autoPlayMusic} />
@@ -154,10 +151,15 @@ export default function App() {
           position: relative;
         }
 
-        .invitation-site-flow {
+        .invitation-app-fade-in {
+          animation: pageFadeIn 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
           position: relative;
-          z-index: 60;
-          margin-top: 100px;
+          z-index: 20;
+        }
+
+        @keyframes pageFadeIn {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
         }
 
         /* Kashmir Artwork & Patterns Parallax Background */
@@ -213,7 +215,6 @@ export default function App() {
           align-items: center;
           gap: 1.8rem;
           box-shadow: var(--shadow-sm);
-          transition: opacity 0.4s ease;
         }
 
         .header-monogram {
@@ -244,7 +245,7 @@ export default function App() {
         }
 
         .main-content-flow {
-          padding-top: 2rem;
+          padding-top: 3rem;
           padding-bottom: 4rem;
         }
 
