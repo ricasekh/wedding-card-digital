@@ -49,8 +49,6 @@ export const Hero = ({ onOpenRSVP }) => {
             Daughter
           </div>
 
-          <div className="on-text font-serif">on</div>
-
           {/* Couple Names */}
           <div className="couple-headline">
             <h1 className="font-serif bride-title">{weddingConfig.couple.bride}</h1>
@@ -174,13 +172,7 @@ export const Hero = ({ onOpenRSVP }) => {
         .daughter-word {
           font-size: 3.2rem;
           color: #1D3557;
-          margin: 0.8rem 0 0.2rem 0;
-        }
-
-        .on-text {
-          font-size: 0.95rem;
-          color: #6B5E55;
-          margin-bottom: 0.8rem;
+          margin: 0.8rem 0 0.8rem 0;
         }
 
         .couple-headline {

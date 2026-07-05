@@ -12,7 +12,7 @@ import { RSVPModal } from './components/RSVPModal';
 import { AdminDashboard } from './components/AdminDashboard';
 import { ThemeSelector } from './components/ThemeSelector';
 import { weddingConfig } from './config/weddingConfig';
-import { Heart, Lock, Sparkles } from 'lucide-react';
+import { Heart, Lock } from 'lucide-react';
 
 export default function App() {
   const [isOpened, setIsOpened] = useState(false);
@@ -32,7 +32,7 @@ export default function App() {
 
   return (
     <div className="app-main-container">
-      {/* Floating Ambient Rose Petals */}
+      {/* Floating Rose Petals Particle System */}
       <div className="petal-container">
         <div className="petal" style={{ left: '10%', width: '14px', height: '14px', animationDelay: '0s' }}></div>
         <div className="petal" style={{ left: '25%', width: '18px', height: '18px', animationDelay: '3s' }}></div>
@@ -41,58 +41,58 @@ export default function App() {
         <div className="petal" style={{ left: '85%', width: '20px', height: '20px', animationDelay: '4.5s' }}></div>
       </div>
 
-      {!isOpened ? (
-        <Envelope onOpen={handleEnvelopeOpened} />
-      ) : (
-        <div className="invitation-content-fade">
-          {/* Header Navigation */}
-          <header className="site-header glass-pill">
-            <div className="header-monogram">{weddingConfig.couple.monogram}</div>
-            <button className="header-rsvp-btn" onClick={() => setIsRSVPOpen(true)}>
-              <Heart size={14} className="text-gold" />
-              <span>RSVP</span>
-            </button>
-          </header>
+      {/* Interactive Envelope Experience (Smooth Fade Out) */}
+      {!isOpened && <Envelope onOpen={handleEnvelopeOpened} />}
 
-          {/* Main Invitation Sections */}
-          <main className="main-content-flow">
-            <Hero onOpenRSVP={() => setIsRSVPOpen(true)} />
-            <OurStory />
-            <Itinerary />
-            <Venues />
-            <Gallery />
-            <DressCode />
-            <GiftRegistry />
+      {/* Main Digital Invitation Website (Smooth Crossfade Fade In) */}
+      <div className={`invitation-site-wrapper ${isOpened ? 'site-visible' : 'site-hidden'}`}>
+        {/* Header Navigation */}
+        <header className="site-header glass-pill">
+          <div className="header-monogram">{weddingConfig.couple.monogram}</div>
+          <button className="header-rsvp-btn" onClick={() => setIsRSVPOpen(true)}>
+            <Heart size={14} className="text-gold" />
+            <span>RSVP</span>
+          </button>
+        </header>
 
-            {/* Bottom RSVP Banner */}
-            <section className="section-padding text-center">
-              <div className="glass-card rsvp-banner">
-                <span className="font-script section-script">We Can't Wait</span>
-                <h2 className="font-serif section-title">Join Us in Florence</h2>
-                <p className="rsvp-banner-text">Please confirm your attendance so we can finalize our arrangements.</p>
-                <button className="btn-gold mt-6" onClick={() => setIsRSVPOpen(true)}>
-                  <Heart size={16} />
-                  <span>Confirm RSVP Now</span>
-                </button>
-              </div>
-            </section>
-          </main>
+        {/* Main Content Flow */}
+        <main className="main-content-flow">
+          <Hero onOpenRSVP={() => setIsRSVPOpen(true)} />
+          <OurStory />
+          <Itinerary />
+          <Venues />
+          <Gallery />
+          <DressCode />
+          <GiftRegistry />
 
-          {/* Footer */}
-          <footer className="site-footer">
-            <div className="footer-monogram font-serif">{weddingConfig.couple.monogram}</div>
-            <p className="footer-names">{weddingConfig.couple.bride} & {weddingConfig.couple.groom}</p>
-            <p className="footer-date">{weddingConfig.couple.formattedDate}</p>
+          {/* Bottom RSVP Banner */}
+          <section className="section-padding text-center">
+            <div className="glass-card rsvp-banner">
+              <span className="font-script section-script">We Can't Wait</span>
+              <h2 className="font-serif section-title">Join Us in Srinagar</h2>
+              <p className="rsvp-banner-text">Please confirm your attendance so we can finalize our arrangements.</p>
+              <button className="btn-gold mt-6" onClick={() => setIsRSVPOpen(true)}>
+                <Heart size={16} />
+                <span>Confirm RSVP Now</span>
+              </button>
+            </div>
+          </section>
+        </main>
 
-            <button className="admin-footer-link" onClick={() => setIsAdminOpen(true)}>
-              <Lock size={12} />
-              <span>Couple Admin Login</span>
-            </button>
-          </footer>
-        </div>
-      )}
+        {/* Footer */}
+        <footer className="site-footer">
+          <div className="footer-monogram font-serif">{weddingConfig.couple.monogram}</div>
+          <p className="footer-names">{weddingConfig.couple.groomShort} & {weddingConfig.couple.brideShort}</p>
+          <p className="footer-date">{weddingConfig.couple.formattedDate}</p>
 
-      {/* Floating Music & Theme Widgets */}
+          <button className="admin-footer-link" onClick={() => setIsAdminOpen(true)}>
+            <Lock size={12} />
+            <span>Couple Admin Login</span>
+          </button>
+        </footer>
+      </div>
+
+      {/* Floating Audio & Theme Controls */}
       <AudioPlayer autoPlayTrigger={autoPlayMusic} />
       <ThemeSelector currentTheme={theme} onThemeChange={setTheme} />
 
@@ -106,8 +106,16 @@ export default function App() {
           position: relative;
         }
 
-        .invitation-content-fade {
-          animation: fadeIn 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        .invitation-site-wrapper {
+          opacity: 0;
+          visibility: hidden;
+          transition: opacity 1.4s cubic-bezier(0.16, 1, 0.3, 1), visibility 1.4s ease;
+          will-change: opacity;
+        }
+
+        .invitation-site-wrapper.site-visible {
+          opacity: 1;
+          visibility: visible;
         }
 
         .site-header {
