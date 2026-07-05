@@ -5,21 +5,17 @@ import { Sparkles } from 'lucide-react';
 
 export const Envelope = ({ onOpen }) => {
   const [stage, setStage] = useState('idle');
-  // 'idle' -> 'cracking' -> 'flap-open' -> 'letter-slide' -> 'smooth-fade-out'
 
   const handleOpenEnvelope = (e) => {
     e.stopPropagation();
     if (stage !== 'idle') return;
 
-    // Phase 1: Real Wax Seal Crack (0ms - 700ms)
     setStage('cracking');
 
-    // Phase 2: Top Flap & Real Wax Seal rotate 180deg together in 3D (700ms - 3200ms)
     setTimeout(() => {
       setStage('flap-open');
     }, 650);
 
-    // Phase 3: Letter slides out with GPU 3D transform & gold confetti (3200ms - 5400ms)
     setTimeout(() => {
       setStage('letter-slide');
 
@@ -32,7 +28,6 @@ export const Envelope = ({ onOpen }) => {
       });
     }, 3000);
 
-    // Phase 4: Smooth zero-jank crossfade to main invitation page (5400ms - 6600ms)
     setTimeout(() => {
       setStage('smooth-fade-out');
       onOpen();
@@ -115,7 +110,7 @@ export const Envelope = ({ onOpen }) => {
               <div className="seal-drop-shadow-wrapper">
                 <div className="seal-circular-mask">
                   <img 
-                    src="/images/real_wax_seal_rm.jpg" 
+                    src="./images/real_wax_seal_rm.jpg" 
                     alt="Photorealistic R&M Gold Wax Seal" 
                     className="nano-seal-img"
                   />
@@ -267,7 +262,6 @@ export const Envelope = ({ onOpen }) => {
         .text-emerald { color: #1B4332 !important; }
         .text-blue { color: #1D3557 !important; }
 
-        /* Smooth 60FPS Letter Slide Out */
         .letter-real-card.letter-slide,
         .letter-real-card.smooth-fade-out {
           transform: translate3d(0, -320px, 80px) scale3d(1.06, 1.06, 1);
@@ -275,7 +269,6 @@ export const Envelope = ({ onOpen }) => {
           z-index: 15;
         }
 
-        /* Side & Bottom Flaps */
         .flap-left {
           position: absolute;
           top: 0;
@@ -318,7 +311,6 @@ export const Envelope = ({ onOpen }) => {
           filter: drop-shadow(0 -5px 10px rgba(0,0,0,0.08));
         }
 
-        /* Top 3D V-Flap */
         .flap-top-3d {
           position: absolute;
           top: 0;
@@ -354,7 +346,6 @@ export const Envelope = ({ onOpen }) => {
           background: linear-gradient(90deg, transparent, #D4AF37, transparent);
         }
 
-        /* Top Flap 3D Hinge Flip 180deg */
         .flap-top-3d.flap-open,
         .flap-top-3d.letter-slide,
         .flap-top-3d.smooth-fade-out {
@@ -362,7 +353,6 @@ export const Envelope = ({ onOpen }) => {
           z-index: 2;
         }
 
-        /* Photorealistic R&M Wax Seal Positioned DEAD-CENTERED at V-Apex Tip */
         .nano-seal-wrapper {
           position: absolute;
           top: 210px;

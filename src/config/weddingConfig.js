@@ -15,7 +15,8 @@ export const weddingConfig = {
     invitationMessage: "Mr. & Mrs. Mir Mohammad Yousuf request the pleasure of your gracious presence at the wedding of their Daughter",
     tagline: "We request the honor of your presence as we celebrate our Nikkah & Wedding.",
     subtitle: "Together with their families",
-    artwork: "/images/kashmir_mountains.jpg"
+    artwork: "./images/kashmir_mountains.jpg",
+    image: "./images/hero_couple.jpg"
   },
 
   music: {
@@ -30,7 +31,7 @@ export const weddingConfig = {
       address: "Sanat Nagar Chowk, Srinagar, Jammu & Kashmir",
       googleMapsUrl: "https://maps.google.com/?q=Hotel+Northern+Residency+Sanat+Nagar+Srinagar",
       appleMapsUrl: "https://maps.apple.com/?q=Hotel+Northern+Residency+Sanat+Nagar+Srinagar",
-      image: "/images/kashmir_mountains.jpg",
+      image: "./images/kashmir_mountains.jpg",
       note: "Buffet to be served from 12:00 PM to 3:00 PM."
     },
     reception: {
@@ -39,7 +40,7 @@ export const weddingConfig = {
       address: "Sanat Nagar Chowk, Srinagar, Jammu & Kashmir",
       googleMapsUrl: "https://maps.google.com/?q=Sanat+Nagar+Srinagar",
       appleMapsUrl: "https://maps.apple.com/?q=Sanat+Nagar+Srinagar",
-      image: "/images/kashmir_mountains.jpg",
+      image: "./images/ceremony_venue.jpg",
       note: "Gracious presence requested."
     }
   },
@@ -70,19 +71,20 @@ export const weddingConfig = {
       year: "2024",
       title: "First Met",
       description: "A blessed journey that brought two families together in Srinagar.",
-      image: "/images/kashmir_mountains.jpg"
+      image: "./images/kashmir_mountains.jpg"
     },
     {
       year: "2026",
       title: "The Nikkah",
       description: "Beginning our story in the heart of Kashmir surrounded by loved ones.",
-      image: "/images/kashmir_mountains.jpg"
+      image: "./images/ceremony_venue.jpg"
     }
   ],
 
   gallery: [
-    { id: 1, src: "/images/kashmir_mountains.jpg", caption: "Kashmir Mountains" },
-    { id: 2, src: "/images/kashmir_mountains.jpg", caption: "Pine Forest Serenity" }
+    { id: 1, src: "./images/kashmir_mountains.jpg", caption: "Kashmir Mountains" },
+    { id: 2, src: "./images/ceremony_venue.jpg", caption: "Sanat Nagar Estate" },
+    { id: 3, src: "./images/hero_couple.jpg", caption: "Celebration Moments" }
   ],
 
   dressCode: {
@@ -104,7 +106,7 @@ export const weddingConfig = {
   },
 
   rsvp: {
-    whatsappNumber: "919149602047", // 9149602047
+    whatsappNumber: "919149602047",
     deadline: "September 25, 2026",
     contactPerson: "Mr. Mir Mohammad Yousuf (9149602047)"
   }
