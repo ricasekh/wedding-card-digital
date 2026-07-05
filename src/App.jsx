@@ -25,6 +25,7 @@ export default function App() {
   const handleEnvelopeComplete = () => {
     setIsOpened(true);
     setAutoPlayMusic(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   useEffect(() => {
@@ -88,7 +89,7 @@ export default function App() {
 
       {!isOpened ? (
         /* Sealed 3D Envelope Experience */
-        <Envelope onComplete={handleEnvelopeComplete} />
+        <Envelope onOpen={handleEnvelopeComplete} />
       ) : (
         /* Full Digital Invitation Web App (Smooth Fade In) */
         <div className="invitation-app-fade-in">
