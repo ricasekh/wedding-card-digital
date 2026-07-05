@@ -1,320 +1,121 @@
-import React, { useState, useEffect } from 'react';
-import { Envelope } from './components/Envelope';
+import React, { useEffect, useState } from 'react';
+import { ScrollOpening } from './components/ScrollOpening';
+import { LeafCanvas } from './components/LeafCanvas';
 import { Hero } from './components/Hero';
-import { OurStory } from './components/OurStory';
-import { Itinerary } from './components/Itinerary';
+import { Story } from './components/Story';
+import { Schedule } from './components/Schedule';
 import { Venues } from './components/Venues';
-import { Gallery } from './components/Gallery';
 import { DressCode } from './components/DressCode';
-import { GiftRegistry } from './components/GiftRegistry';
-import { AudioPlayer } from './components/AudioPlayer';
 import { RSVPModal } from './components/RSVPModal';
-import { AdminDashboard } from './components/AdminDashboard';
-import { ThemeSelector } from './components/ThemeSelector';
+import { SoundToggle } from './components/SoundToggle';
+import { Reveal } from './components/Reveal';
 import { weddingConfig } from './config/weddingConfig';
-import { Heart, Lock } from 'lucide-react';
+import { Heart } from 'lucide-react';
 
 export default function App() {
-  const [hasUnfolded, setHasUnfolded] = useState(false);
-  const [scrollY, setScrollY] = useState(0);
-  const [autoPlayMusic, setAutoPlayMusic] = useState(false);
-  const [isRSVPOpen, setIsRSVPOpen] = useState(false);
-  const [isAdminOpen, setIsAdminOpen] = useState(false);
-  const [theme, setTheme] = useState('maison');
+  const [opened, setOpened] = useState(false); // envelope scrubbed fully open
+  const [musicOn, setMusicOn] = useState(false); // set on seal tap (user gesture)
+  const [isRSVPOpen, setRSVPOpen] = useState(false);
+  const { couple, rsvp } = weddingConfig;
 
-  const handleUnfoldComplete = () => {
-    setHasUnfolded(true);
-    setAutoPlayMusic(true);
-    window.scrollTo({ top: 0, behavior: 'instant' });
-  };
-
+  // Expose the real paper texture to CSS with the correct base URL
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
+    const base = import.meta.env.BASE_URL || './';
+    document.documentElement.style.setProperty(
+      '--paper-tex',
+      `url(${base}images/real_paper_texture.jpg)`
+    );
+  }, []);
 
-    let ticking = false;
-    const handleScroll = () => {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          setScrollY(window.scrollY);
-          ticking = false;
-        });
-        ticking = true;
+  // Scroll parallax for [data-parallax] imagery
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const els = Array.from(document.querySelectorAll('[data-parallax]'));
+    if (!els.length) return;
+    let raf = 0;
+
+    const tick = () => {
+      raf = 0;
+      const mid = window.innerHeight / 2;
+      for (const el of els) {
+        const frame = el.parentElement.getBoundingClientRect();
+        if (frame.bottom < -120 || frame.top > window.innerHeight + 120) continue;
+        const drift = (frame.top + frame.height / 2 - mid) * -parseFloat(el.dataset.parallax || 0.1);
+        el.style.transform = `translateY(${drift.toFixed(1)}px) scale(1.14)`;
       }
     };
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(tick);
+    };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [theme]);
-
-  const baseUrl = import.meta.env.BASE_URL || './';
+    tick();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+    };
+  }, []);
 
   return (
-    <div className="app-main-container">
-      {/* Floating Rose Petals Particle System */}
-      <div className="petal-container">
-        <div className="petal" style={{ left: '10%', width: '14px', height: '14px', animationDelay: '0s' }}></div>
-        <div className="petal" style={{ left: '25%', width: '18px', height: '18px', animationDelay: '3s' }}></div>
-        <div className="petal" style={{ left: '45%', width: '12px', height: '12px', animationDelay: '6s' }}></div>
-        <div className="petal" style={{ left: '70%', width: '16px', height: '16px', animationDelay: '1.5s' }}></div>
-        <div className="petal" style={{ left: '85%', width: '20px', height: '20px', animationDelay: '4.5s' }}></div>
-      </div>
+    <>
+      <LeafCanvas />
+      <div className="grain" aria-hidden="true" />
 
-      {/* Kashmir Artwork & Chinar Leaf Parallax Background Layers */}
-      <div className="kashmir-parallax-bg-wrapper">
-        <div 
-          className="parallax-layer layer-artwork"
-          style={{ transform: `translate3d(0, ${scrollY * 0.18}px, 0)` }}
-        >
-          <img 
-            src={`${baseUrl}images/kashmir_mountains.jpg`} 
-            alt="Kashmir Parallax Background" 
-            className="parallax-artwork-img"
-          />
-        </div>
+      <header className={`site-header ${opened ? 'is-on' : ''}`}>
+        <span className="header-monogram">{couple.monogram}</span>
+        <button className="header-rsvp" onClick={() => setRSVPOpen(true)}>
+          RSVP
+        </button>
+      </header>
 
-        <div 
-          className="parallax-layer layer-patterns"
-          style={{ transform: `translate3d(0, ${scrollY * 0.35}px, 0)` }}
-        >
-          <div className="chinar-leaf leaf-1">🍁</div>
-          <div className="chinar-leaf leaf-2">🍁</div>
-          <div className="chinar-leaf leaf-3">🍁</div>
-          <div className="chinar-leaf leaf-4">🍁</div>
-        </div>
-      </div>
+      <ScrollOpening onSealTap={() => setMusicOn(true)} onOpenedChange={setOpened} />
 
-      {!hasUnfolded ? (
-        /* Sealed 3D Envelope Opening Stage */
-        <Envelope onUnfoldComplete={handleUnfoldComplete} />
-      ) : (
-        /* Permanent Unlocked Invitation Web App (Once unlocked, scrolling to top stays on Hero!) */
-        <div className="invitation-app-fade-in">
-          {/* Header Navigation Bar */}
-          <header className="site-header glass-pill">
-            <div className="header-monogram">{weddingConfig.couple.monogram}</div>
-            <button className="header-rsvp-btn" onClick={() => setIsRSVPOpen(true)}>
-              <Heart size={14} className="text-gold" />
-              <span>RSVP</span>
-            </button>
-          </header>
+      <div className="site">
+        <main>
+          <Hero onOpenRSVP={() => setRSVPOpen(true)} />
+          <Story />
+          <Schedule />
+          <Venues />
+          <DressCode />
 
-          {/* Main Website Sections */}
-          <main className="main-content-flow">
-            <Hero onOpenRSVP={() => setIsRSVPOpen(true)} />
-            <OurStory />
-            <Itinerary />
-            <Venues />
-            <Gallery />
-            <DressCode />
-            <GiftRegistry />
-
-            {/* Bottom RSVP Banner */}
-            <section className="section-padding text-center">
-              <div className="glass-card rsvp-banner">
-                <span className="font-script section-script">We Can't Wait</span>
-                <h2 className="font-serif section-title">Join Us in Srinagar</h2>
-                <p className="rsvp-banner-text">Please confirm your attendance so we can finalize our arrangements.</p>
-                <button className="btn-gold mt-6" onClick={() => setIsRSVPOpen(true)}>
-                  <Heart size={16} />
-                  <span>Confirm RSVP Now</span>
+          <section className="section" id="rsvp">
+            <div className="container">
+              <Reveal className="rsvp-banner">
+                <div className="eyebrow">We Can't Wait</div>
+                <h2 className="section-title">Join Us in Srinagar</h2>
+                <p>
+                  Your presence and prayers are the most treasured blessings. Kindly
+                  confirm your attendance so the family may welcome you properly.
+                </p>
+                <button className="btn btn-primary" onClick={() => setRSVPOpen(true)}>
+                  <Heart size={13} strokeWidth={2.2} />
+                  Confirm RSVP
                 </button>
-              </div>
-            </section>
-          </main>
-
-          {/* Footer with Inline Audio Player & Theme Palette Controls */}
-          <footer className="site-footer">
-            <div className="footer-monogram font-serif">{weddingConfig.couple.monogram}</div>
-            <p className="footer-names">{weddingConfig.couple.groomShort} & {weddingConfig.couple.brideShort}</p>
-            <p className="footer-date">{weddingConfig.couple.formattedDate}</p>
-
-            {/* Controls moved to bottom of webpage */}
-            <div className="footer-controls-group">
-              <AudioPlayer autoPlayTrigger={autoPlayMusic} isInline={true} />
-              <ThemeSelector currentTheme={theme} onThemeChange={setTheme} isInline={true} />
+                <p className="rsvp-deadline">Before {rsvp.deadline}</p>
+              </Reveal>
             </div>
+          </section>
+        </main>
 
-            <button className="admin-footer-link" onClick={() => setIsAdminOpen(true)}>
-              <Lock size={12} />
-              <span>Couple Admin Login</span>
-            </button>
-          </footer>
-        </div>
-      )}
+        <footer className="site-footer">
+          <div className="footer-monogram">{couple.monogram}</div>
+          <p className="footer-names">
+            {couple.groomShort} &amp; {couple.brideShort}
+          </p>
+          <p className="footer-date">{couple.formattedDate}</p>
+          <span className="footer-hashtag">{couple.hashtag}</span>
+          <p className="footer-contact">
+            With love, {couple.hosts}
+            <br />
+            {rsvp.contactPerson} · {rsvp.contactPhone}
+          </p>
+        </footer>
+      </div>
 
-      {/* Modals */}
-      <RSVPModal isOpen={isRSVPOpen} onClose={() => setIsRSVPOpen(false)} />
-      <AdminDashboard isOpen={isAdminOpen} onClose={() => setIsAdminOpen(false)} />
-
-      <style>{`
-        .app-main-container {
-          min-height: 100vh;
-          position: relative;
-        }
-
-        .invitation-app-fade-in {
-          animation: pageFadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-          position: relative;
-          z-index: 20;
-        }
-
-        @keyframes pageFadeIn {
-          from { opacity: 0; filter: blur(6px); }
-          to { opacity: 1; filter: blur(0); }
-        }
-
-        /* Kashmir Artwork & Patterns Parallax Background */
-        .kashmir-parallax-bg-wrapper {
-          position: fixed;
-          inset: 0;
-          pointer-events: none;
-          z-index: 2;
-          overflow: hidden;
-        }
-
-        .parallax-layer {
-          position: absolute;
-          width: 100%;
-          height: 120%;
-          will-change: transform;
-        }
-
-        .layer-artwork {
-          opacity: 0.16;
-          filter: blur(2px);
-        }
-
-        .parallax-artwork-img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-        }
-
-        .layer-patterns {
-          opacity: 0.22;
-        }
-
-        .chinar-leaf {
-          position: absolute;
-          font-size: 2.2rem;
-          filter: drop-shadow(0 4px 10px rgba(212, 175, 55, 0.4));
-        }
-
-        .leaf-1 { top: 15%; left: 8%; }
-        .leaf-2 { top: 40%; right: 10%; font-size: 3rem; }
-        .leaf-3 { top: 70%; left: 12%; }
-        .leaf-4 { top: 88%; right: 15%; font-size: 2.5rem; }
-
-        .site-header {
-          position: fixed;
-          top: 1.2rem;
-          left: 50%;
-          transform: translateX(-50%);
-          z-index: 90;
-          padding: 0.5rem 1.4rem;
-          display: flex;
-          align-items: center;
-          gap: 1.8rem;
-          box-shadow: var(--shadow-sm);
-        }
-
-        .header-monogram {
-          font-family: var(--font-serif);
-          font-weight: 700;
-          font-size: 1.1rem;
-          letter-spacing: 2px;
-          color: var(--text-gold);
-        }
-
-        .header-rsvp-btn {
-          background: transparent;
-          border: none;
-          display: flex;
-          align-items: center;
-          gap: 0.4rem;
-          font-family: var(--font-sans);
-          font-size: 0.75rem;
-          font-weight: 600;
-          letter-spacing: 1px;
-          text-transform: uppercase;
-          color: var(--text-primary);
-          cursor: pointer;
-        }
-
-        .header-rsvp-btn:hover {
-          color: var(--text-gold);
-        }
-
-        .main-content-flow {
-          padding-top: 2rem;
-          padding-bottom: 4rem;
-        }
-
-        .rsvp-banner {
-          padding: 3.5rem 2rem;
-          max-width: 580px;
-          margin: 0 auto;
-        }
-
-        .rsvp-banner-text {
-          font-size: 0.95rem;
-          color: var(--text-secondary);
-          margin-top: 0.6rem;
-        }
-
-        .site-footer {
-          text-align: center;
-          padding: 3.5rem 1rem 5rem 1rem;
-          border-top: 1px solid var(--border-light);
-          background: var(--bg-secondary);
-        }
-
-        .footer-monogram {
-          font-size: 2.2rem;
-          font-weight: 700;
-          color: var(--text-gold);
-        }
-
-        .footer-names {
-          font-family: var(--font-serif);
-          font-size: 1.2rem;
-          color: var(--text-primary);
-          margin: 0.4rem 0;
-        }
-
-        .footer-date {
-          font-size: 0.75rem;
-          letter-spacing: 2px;
-          text-transform: uppercase;
-          color: var(--text-muted);
-        }
-
-        .footer-controls-group {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 1rem;
-          margin-top: 2rem;
-          flex-wrap: wrap;
-        }
-
-        .admin-footer-link {
-          background: transparent;
-          border: none;
-          color: var(--text-muted);
-          font-size: 0.75rem;
-          display: inline-flex;
-          align-items: center;
-          gap: 0.4rem;
-          margin-top: 2.2rem;
-          cursor: pointer;
-          transition: color 0.2s ease;
-        }
-
-        .admin-footer-link:hover {
-          color: var(--text-gold);
-        }
-      `}</style>
-    </div>
+      <SoundToggle autoPlay={musicOn} />
+      <RSVPModal isOpen={isRSVPOpen} onClose={() => setRSVPOpen(false)} />
+    </>
   );
 }

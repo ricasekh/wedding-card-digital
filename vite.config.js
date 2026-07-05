@@ -2,7 +2,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
 export default defineConfig({
-  base: '/wedding-card-digital/',
+  base: process.env.NODE_ENV === 'production' ? '/wedding-card-digital/' : '/',
   plugins: [react()],
   server: {
     port: 3000,
