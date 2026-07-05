@@ -211,7 +211,7 @@ button {
 
 .opening {
   position: relative;
-  height: 420vh;
+  height: 460vh;
   margin-bottom: -100vh; /* hero slides in beneath the final frames */
   z-index: 30;
 }
@@ -243,6 +243,27 @@ button {
   background: radial-gradient(95% 85% at 50% 42%, transparent 55%, rgba(90, 60, 30, 0.09) 100%);
 }
 
+/* Kashmir horizon behind the envelope — mountains & Dal lake watercolor */
+.stage-scenery {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 52vh;
+  pointer-events: none;
+  opacity: 0.55;
+  will-change: transform;
+}
+
+.stage-scenery img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 32%;
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 55%);
+  mask-image: linear-gradient(180deg, transparent 0%, #000 55%);
+}
+
 .env-scene {
   perspective: 1600px;
   perspective-origin: 50% 38%;
@@ -264,19 +285,16 @@ button {
   will-change: transform;
 }
 
+/* The envelope is a deterministic z-index sandwich (back 1 → liner 2 →
+   card 3 → pocket 4 → flap 5); only the flap keeps true 3D for its
+   rotation. Chrome's nested preserve-3d sorter is too unstable for
+   interleaving these layers by 3D position. */
 .env {
   position: relative;
   width: min(460px, 88vw);
   aspect-ratio: 100 / 66;
-  transform-style: preserve-3d;
-}
-
-.env-shell {
-  position: absolute;
-  inset: 0;
-  transform-style: preserve-3d;
-  /* no will-change here: opacity/transform hints would group the layer and
-     break 3D interleaving between the pocket, flap, seal and the card */
+  perspective: 1600px;
+  perspective-origin: 50% 20%;
 }
 
 /* Ground shadow */
@@ -286,6 +304,7 @@ button {
   bottom: -17%;
   width: 88%;
   height: 30px;
+  z-index: 0;
   transform: translateX(-50%);
   background: radial-gradient(50% 50% at 50% 50%, rgba(43, 29, 18, 0.3), transparent 70%);
   filter: blur(6px);
@@ -312,24 +331,28 @@ button {
     0 24px 60px rgba(43, 29, 18, 0.26),
     0 4px 12px rgba(43, 29, 18, 0.12),
     inset 0 1px 0 rgba(255, 252, 240, 0.6);
-  transform: translateZ(0px);
+  z-index: 1;
 }
 
+/* Envelope liner — Kashmir watercolor with faint gold pinstripes */
 .env-inside {
   position: absolute;
   inset: 2px;
   border-radius: 7px;
-  background:
+  background-image:
     repeating-linear-gradient(
       -45deg,
-      rgba(217, 180, 95, 0.14) 0px,
-      rgba(217, 180, 95, 0.14) 1px,
+      rgba(217, 180, 95, 0.1) 0px,
+      rgba(217, 180, 95, 0.1) 1px,
       transparent 1px,
-      transparent 9px
+      transparent 10px
     ),
-    linear-gradient(180deg, #35402f 0%, #262e22 100%);
-  box-shadow: inset 0 6px 18px rgba(0, 0, 0, 0.35);
-  transform: translateZ(0.5px);
+    linear-gradient(180deg, rgba(43, 34, 20, 0.28), rgba(43, 34, 20, 0.16)),
+    var(--scenery);
+  background-size: auto, auto, cover;
+  background-position: 0 0, 0 0, 50% 66%;
+  box-shadow: inset 0 6px 18px rgba(0, 0, 0, 0.4);
+  z-index: 2;
 }
 
 /* The card inside */
@@ -347,7 +370,7 @@ button {
   background-blend-mode: multiply;
   border-radius: 4px;
   box-shadow: 0 2px 8px rgba(43, 29, 18, 0.14);
-  transform: translateZ(1px);
+  z-index: 3; /* JS raises to 6 for the zoom-through */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -409,7 +432,7 @@ button {
   background-position: 0 0, 0 0, 50% 60%;
   background-blend-mode: normal, multiply, normal;
   clip-path: polygon(0 0, 50% 46%, 100% 0, 100% 100%, 0 100%);
-  transform: translateZ(2px);
+  z-index: 4;
   filter: drop-shadow(0 -2px 3px rgba(43, 29, 18, 0.14));
 }
 
@@ -436,16 +459,17 @@ button {
   background: linear-gradient(-90deg, transparent, rgba(43, 29, 18, 0.18));
 }
 
-/* Flap */
+/* Flap — the only genuinely 3D piece */
 .env-flap {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 52%;
+  z-index: 5;
   transform-origin: 50% 0;
   transform-style: preserve-3d;
-  transform: rotateX(0deg) translateZ(3px);
+  transform: rotateX(0deg);
   will-change: transform;
 }
 
@@ -465,36 +489,41 @@ button {
   background-position: 0 0, 0 0, 50% 20%;
   background-blend-mode: normal, multiply, normal;
   border-radius: 8px 8px 0 0;
-  /* crisp folded edge separating the flap from the pocket beneath */
-  filter: drop-shadow(0 4px 5px rgba(43, 29, 18, 0.2));
+  /* NOTE: no filter here — filters flatten/group inside preserve-3d and
+     make Chrome drop the whole rotated flap subtree */
 }
 
 .flap-face.back {
   /* mirror across the vertical axis so the triangle silhouette is preserved */
   transform: rotateY(180deg);
-  background:
+  background-image:
     repeating-linear-gradient(
       -45deg,
-      rgba(217, 180, 95, 0.16) 0px,
-      rgba(217, 180, 95, 0.16) 1px,
+      rgba(217, 180, 95, 0.1) 0px,
+      rgba(217, 180, 95, 0.1) 1px,
       transparent 1px,
-      transparent 9px
+      transparent 10px
     ),
-    linear-gradient(0deg, #35402f 0%, #262e22 100%);
+    linear-gradient(0deg, rgba(43, 34, 20, 0.3), rgba(43, 34, 20, 0.12)),
+    var(--scenery);
+  background-size: auto, auto, cover;
+  background-position: 0 0, 0 0, 50% 12%;
 }
 
-/* Wax seal — real photograph, multiply blend removes the white */
+/* Wax seal — real photograph, glued to the flap tip so it peels
+   open with the flap; backface hidden = gone once the flap turns away */
 .env-seal {
   position: absolute;
   left: 50%;
-  top: 47%;
+  top: 100%;
   width: clamp(88px, 22vw, 112px);
   aspect-ratio: 1;
-  transform: translate(-50%, -50%) translateZ(6px);
+  /* enough z to win Chrome's nested preserve-3d paint sorting */
+  transform: translate(-50%, -56%) translateZ(6px);
   border: none;
   background: transparent;
   padding: 0;
-  will-change: transform, opacity;
+  backface-visibility: hidden;
 }
 
 .env-seal img {
@@ -650,6 +679,29 @@ button {
   text-align: center;
   padding: 6.5rem 1.4rem 4rem;
   position: relative;
+  isolation: isolate;
+}
+
+/* Kashmir horizon at the foot of the hero */
+.hero-scenery {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 55%;
+  overflow: hidden;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.45;
+}
+
+.hero-scenery img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 30%;
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 45%, #000 82%, transparent 100%);
+  mask-image: linear-gradient(180deg, transparent 0%, #000 45%, #000 82%, transparent 100%);
 }
 
 .hero-bismillah {

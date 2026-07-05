@@ -10,6 +10,7 @@ import { RSVPModal } from './components/RSVPModal';
 import { SoundToggle } from './components/SoundToggle';
 import { Reveal } from './components/Reveal';
 import { weddingConfig } from './config/weddingConfig';
+import { unlockAudio } from './lib/sfx';
 import { Heart } from 'lucide-react';
 
 export default function App() {
@@ -18,13 +19,25 @@ export default function App() {
   const [isRSVPOpen, setRSVPOpen] = useState(false);
   const { couple, rsvp } = weddingConfig;
 
-  // Expose the real paper texture to CSS with the correct base URL
+  // Expose the real paper texture & Kashmir artwork to CSS with the base URL
   useEffect(() => {
     const base = import.meta.env.BASE_URL || './';
-    document.documentElement.style.setProperty(
-      '--paper-tex',
-      `url(${base}images/real_paper_texture.jpg)`
-    );
+    const root = document.documentElement.style;
+    root.setProperty('--paper-tex', `url(${base}images/real_paper_texture.jpg)`);
+    root.setProperty('--scenery', `url(${base}images/kashmir_mountains.jpg)`);
+  }, []);
+
+  // WebAudio needs one real user gesture before paper sounds may play
+  useEffect(() => {
+    const unlock = () => unlockAudio();
+    window.addEventListener('pointerdown', unlock, { passive: true });
+    window.addEventListener('touchstart', unlock, { passive: true });
+    window.addEventListener('keydown', unlock);
+    return () => {
+      window.removeEventListener('pointerdown', unlock);
+      window.removeEventListener('touchstart', unlock);
+      window.removeEventListener('keydown', unlock);
+    };
   }, []);
 
   // Scroll parallax for [data-parallax] imagery

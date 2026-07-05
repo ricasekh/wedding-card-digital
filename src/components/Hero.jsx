@@ -4,11 +4,22 @@ import { weddingConfig } from '../config/weddingConfig';
 import { Countdown } from './Countdown';
 import { downloadICS } from '../lib/calendar';
 
+const baseUrl = import.meta.env.BASE_URL || './';
+
 export function Hero({ onOpenRSVP }) {
   const { couple } = weddingConfig;
 
   return (
     <section className="hero">
+      <div className="hero-scenery" aria-hidden="true">
+        <img
+          src={`${baseUrl}images/kashmir_mountains.jpg`}
+          alt=""
+          data-parallax="0.06"
+          draggable="false"
+        />
+      </div>
+
       <p className="hero-bismillah">{couple.bismillah}</p>
 
       <div className="ornament" aria-hidden="true">
