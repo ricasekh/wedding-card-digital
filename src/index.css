@@ -93,6 +93,18 @@ button {
   background-size: 220px;
 }
 
+/* ---- Whole-site embossed paper backdrop --------------------- */
+
+.paper-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: var(--emboss);
+  background-size: 300px;
+  opacity: 0.16;
+}
+
 /* ---- Leaf canvas ------------------------------------------- */
 
 .leaf-canvas {
@@ -211,7 +223,7 @@ button {
 
 .opening {
   position: relative;
-  height: 460vh;
+  height: 500vh; /* long runway: the opening should feel unhurried */
   margin-bottom: -100vh; /* hero slides in beneath the final frames */
   z-index: 30;
 }
@@ -262,6 +274,27 @@ button {
   object-position: 50% 32%;
   -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 55%);
   mask-image: linear-gradient(180deg, transparent 0%, #000 55%);
+}
+
+/* Slow valley mist drifting across the scenery */
+.stage-mist {
+  position: absolute;
+  left: -30%;
+  right: -30%;
+  bottom: 8vh;
+  height: 26vh;
+  pointer-events: none;
+  background:
+    radial-gradient(42% 90% at 18% 60%, rgba(255, 253, 246, 0.55), transparent 70%),
+    radial-gradient(36% 80% at 55% 40%, rgba(255, 253, 246, 0.4), transparent 70%),
+    radial-gradient(46% 95% at 86% 65%, rgba(255, 253, 246, 0.5), transparent 70%);
+  animation: mistDrift 46s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+@keyframes mistDrift {
+  from { transform: translateX(-4%); }
+  to { transform: translateX(4%); }
 }
 
 .env-scene {
@@ -316,21 +349,25 @@ button {
   50% { transform: translateX(-50%) scaleX(0.92); opacity: 0.75; }
 }
 
-/* Back panel + interior */
+/* Back panel + interior.
+   Material recipe everywhere: embossed damask on top, the paper photo
+   soft-light blended (gentle grain, not rough), warm gradient beneath. */
 .env-back {
   position: absolute;
   inset: 0;
   border-radius: 8px;
   background-image:
-    linear-gradient(160deg, #f0e6d0 0%, #e4d4b4 100%),
-    var(--paper-tex);
-  background-size: auto, 300%;
-  background-position: 0 0, 50% 40%;
-  background-blend-mode: multiply;
+    var(--emboss),
+    var(--paper-tex),
+    linear-gradient(160deg, #f3ead6 0%, #e9dcbd 100%);
+  background-size: 170px, 210%, auto;
+  background-position: 0 0, 50% 40%, 0 0;
+  background-blend-mode: normal, soft-light, normal;
   box-shadow:
-    0 24px 60px rgba(43, 29, 18, 0.26),
-    0 4px 12px rgba(43, 29, 18, 0.12),
-    inset 0 1px 0 rgba(255, 252, 240, 0.6);
+    0 50px 100px -24px rgba(43, 29, 18, 0.38),
+    0 20px 44px rgba(43, 29, 18, 0.16),
+    0 3px 8px rgba(43, 29, 18, 0.1),
+    inset 0 1px 0 rgba(255, 252, 240, 0.7);
   z-index: 1;
 }
 
@@ -363,14 +400,22 @@ button {
   top: 5%;
   bottom: 7%;
   background-image:
-    linear-gradient(175deg, #fdf9f0 0%, #f5edd9 100%),
-    var(--paper-tex);
-  background-size: auto, 260%;
-  background-position: 0 0, 50% 45%;
-  background-blend-mode: multiply;
+    linear-gradient(rgba(253, 249, 240, 0.55), rgba(253, 249, 240, 0.55)),
+    var(--emboss),
+    var(--paper-tex),
+    linear-gradient(175deg, #fdf9f0 0%, #f6efdd 100%);
+  background-size: auto, 130px, 190%, auto;
+  background-position: 0 0, 0 0, 50% 45%, 0 0;
+  background-blend-mode: normal, normal, soft-light, normal;
   border-radius: 4px;
-  box-shadow: 0 2px 8px rgba(43, 29, 18, 0.14);
-  z-index: 3; /* JS raises to 6 for the zoom-through */
+  box-shadow: 0 4px 10px rgba(43, 29, 18, 0.15);
+  z-index: 3; /* JS raises to 9 for the zoom-through */
+  will-change: transform;
+}
+
+.env-card-inner {
+  position: absolute;
+  inset: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -378,7 +423,7 @@ button {
   gap: 0.4rem;
   text-align: center;
   padding: 1rem;
-  will-change: transform;
+  will-change: opacity;
 }
 
 .env-card::before {
@@ -425,15 +470,31 @@ button {
   inset: 0;
   border-radius: 8px;
   background-image:
-    linear-gradient(180deg, rgba(120, 90, 50, 0.06), transparent 22%),
-    linear-gradient(160deg, #f4ebd8 0%, #e8dabd 55%, #ddcca6 100%),
-    var(--paper-tex);
-  background-size: auto, auto, 300%;
-  background-position: 0 0, 0 0, 50% 60%;
-  background-blend-mode: normal, multiply, normal;
+    var(--emboss),
+    linear-gradient(180deg, rgba(120, 90, 50, 0.07), transparent 24%),
+    linear-gradient(0deg, rgba(120, 90, 50, 0.06), transparent 22%),
+    var(--paper-tex),
+    linear-gradient(160deg, #f5ecd9 0%, #eadcbe 55%, #e0cfaa 100%);
+  background-size: 170px, auto, auto, 210%, auto;
+  background-position: 0 0, 0 0, 0 0, 50% 60%, 0 0;
+  background-blend-mode: normal, normal, normal, soft-light, normal;
   clip-path: polygon(0 0, 50% 46%, 100% 0, 100% 100%, 0 100%);
   z-index: 4;
-  filter: drop-shadow(0 -2px 3px rgba(43, 29, 18, 0.14));
+  filter: drop-shadow(0 -3px 4px rgba(43, 29, 18, 0.18));
+}
+
+/* Script line on the envelope face, beneath the seal */
+.env-front-script {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  bottom: 9%;
+  z-index: 4;
+  text-align: center;
+  font-family: var(--font-script);
+  font-size: clamp(1.05rem, 3.4vw, 1.45rem);
+  color: rgba(92, 74, 56, 0.62);
+  pointer-events: none;
 }
 
 .env-pocket::before,
@@ -466,7 +527,7 @@ button {
   left: 0;
   width: 100%;
   height: 52%;
-  z-index: 5;
+  z-index: 6;
   transform-origin: 50% 0;
   transform-style: preserve-3d;
   transform: rotateX(0deg);
@@ -482,15 +543,33 @@ button {
 
 .flap-face.front {
   background-image:
-    linear-gradient(180deg, rgba(110, 80, 40, 0.08), transparent 18%),
-    linear-gradient(180deg, #f9f2e1 0%, #ecdfc2 88%, #e2d1ab 100%),
-    var(--paper-tex);
-  background-size: auto, auto, 320%;
-  background-position: 0 0, 0 0, 50% 20%;
-  background-blend-mode: normal, multiply, normal;
+    var(--emboss),
+    linear-gradient(180deg, rgba(110, 80, 40, 0.09), transparent 20%),
+    var(--paper-tex),
+    linear-gradient(180deg, #f9f2e1 0%, #eee1c4 88%, #e5d5b0 100%);
+  background-size: 170px, auto, 210%, auto;
+  background-position: 0 0, 0 0, 50% 20%, 0 0;
+  background-blend-mode: normal, normal, soft-light, normal;
   border-radius: 8px 8px 0 0;
   /* NOTE: no filter here — filters flatten/group inside preserve-3d and
      make Chrome drop the whole rotated flap subtree */
+}
+
+/* Soft contact shadow the closed flap casts onto the pocket;
+   JS fades it away as the flap lifts */
+.env-flap-shadow {
+  position: absolute;
+  top: 0;
+  left: -1%;
+  width: 102%;
+  height: 54%;
+  z-index: 5;
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  background: rgba(60, 40, 20, 0.3);
+  filter: blur(7px);
+  transform: translateY(6px);
+  transform-origin: 50% 0;
+  pointer-events: none;
 }
 
 .flap-face.back {

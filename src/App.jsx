@@ -19,12 +19,19 @@ export default function App() {
   const [isRSVPOpen, setRSVPOpen] = useState(false);
   const { couple, rsvp } = weddingConfig;
 
+  // The opening film should always start from its first frame
+  useEffect(() => {
+    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+    window.scrollTo(0, 0);
+  }, []);
+
   // Expose the real paper texture & Kashmir artwork to CSS with the base URL
   useEffect(() => {
     const base = import.meta.env.BASE_URL || './';
     const root = document.documentElement.style;
     root.setProperty('--paper-tex', `url(${base}images/real_paper_texture.jpg)`);
     root.setProperty('--scenery', `url(${base}images/kashmir_mountains.jpg)`);
+    root.setProperty('--emboss', `url(${base}images/emboss-pattern.svg)`);
   }, []);
 
   // WebAudio needs one real user gesture before paper sounds may play
@@ -75,6 +82,7 @@ export default function App() {
     <>
       <LeafCanvas />
       <div className="grain" aria-hidden="true" />
+      <div className="paper-bg" aria-hidden="true" />
 
       <header className={`site-header ${opened ? 'is-on' : ''}`}>
         <span className="header-monogram">{couple.monogram}</span>
