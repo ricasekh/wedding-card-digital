@@ -37,7 +37,7 @@ export const weddingConfig = {
       googleMapsUrl: "https://maps.google.com/?q=Hotel+Northern+Residency+Sanat+Nagar+Srinagar",
       appleMapsUrl: "https://maps.apple.com/?q=Hotel+Northern+Residency+Sanat+Nagar+Srinagar",
       image: `${baseUrl}images/ceremony_venue.jpg`,
-      note: "Traditional feast served 12:00 – 3:00 PM",
+      note: "Buffet: gentlemen 12–3 PM · ladies from 4 PM",
     },
   ],
 
@@ -49,16 +49,16 @@ export const weddingConfig = {
       description: "Welcome of guests at Hotel Northern Residency, Sanat Nagar Chowk.",
     },
     {
-      time: "12:30",
+      time: "12–3",
       meridiem: "PM",
-      title: "The Kashmiri Feast",
-      description: "A traditional wazwan lunch, served until three in the afternoon.",
+      title: "Feast for Gentlemen",
+      description: "Traditional wazwan buffet served for the gents, noon until three.",
     },
     {
-      time: "1:30",
+      time: "4:00",
       meridiem: "PM",
-      title: "Nikkah & Blessings",
-      description: "The union of Rasekh & Maleeha, surrounded by loved ones.",
+      title: "Feast for Ladies",
+      description: "Buffet served for the ladies from four in the afternoon.",
     },
   ],
 

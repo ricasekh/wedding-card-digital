@@ -555,20 +555,37 @@ button {
      make Chrome drop the whole rotated flap subtree */
 }
 
-/* Soft contact shadow the closed flap casts onto the pocket;
-   JS fades it away as the flap lifts */
+/* Tight contact shadow the closed flap casts onto the pocket —
+   just a soft line hugging the flap's edge; JS fades it as it lifts */
 .env-flap-shadow {
   position: absolute;
   top: 0;
-  left: -1%;
-  width: 102%;
-  height: 54%;
+  left: 0;
+  width: 100%;
+  height: 52.5%;
   z-index: 5;
   clip-path: polygon(0 0, 100% 0, 50% 100%);
-  background: rgba(60, 40, 20, 0.3);
-  filter: blur(7px);
-  transform: translateY(6px);
+  background: rgba(60, 40, 20, 0.18);
+  filter: blur(3px);
+  transform: translateY(3px);
   transform-origin: 50% 0;
+  pointer-events: none;
+}
+
+/* Shadow of the opened flap, cast up-and-behind onto the backdrop;
+   JS fades it in once the flap folds past vertical */
+.env-flap-shadow-open {
+  position: absolute;
+  top: -51%;
+  left: 2%;
+  width: 96%;
+  height: 51%;
+  z-index: 0;
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  background: rgba(43, 29, 18, 0.16);
+  filter: blur(9px);
+  transform: translateY(12px);
+  opacity: 0;
   pointer-events: none;
 }
 

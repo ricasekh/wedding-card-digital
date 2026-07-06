@@ -23,6 +23,7 @@ export function ScrollOpening({ onSealTap, onOpenedChange }) {
   const envRef = useRef(null);
   const flapRef = useRef(null);
   const flapShadowRef = useRef(null);
+  const flapShadowOpenRef = useRef(null);
   const cardRef = useRef(null);
   const cardInnerRef = useRef(null);
   const hintRef = useRef(null);
@@ -72,10 +73,13 @@ export function ScrollOpening({ onSealTap, onOpenedChange }) {
       // card must rise OVER it, not through it
       flap.style.zIndex = f > 0.5 ? '0' : '6';
 
-      // the flap's contact shadow lifts away with it
+      // the flap's contact shadow lifts away with it…
       const fs = flapShadowRef.current;
-      fs.style.opacity = String(clamp01(1 - f * 2.2));
-      fs.style.transform = `translateY(${6 + f * 26}px) scaleY(${1 + f * 0.12})`;
+      fs.style.opacity = String(clamp01(1 - f * 2.5));
+      fs.style.transform = `translateY(${3 + f * 18}px) scaleY(${1 + f * 0.08})`;
+      // …and once folded past vertical, the flap casts its own shadow
+      // up-and-behind onto the backdrop
+      flapShadowOpenRef.current.style.opacity = String(clamp01((f - 0.55) * 2.2) * 0.8);
 
       // the card rises, then glides back to screen centre while it grows —
       // one continuous move toward the viewer, with a whisper of settle
@@ -251,6 +255,7 @@ export function ScrollOpening({ onSealTap, onOpenedChange }) {
                     requests the pleasure of your company
                   </div>
                   <div className="env-flap-shadow env-fall" ref={flapShadowRef} />
+                  <div className="env-flap-shadow-open env-fall" ref={flapShadowOpenRef} />
 
                   <div className="env-flap env-fall" ref={flapRef}>
                     <div className="flap-face front" />
