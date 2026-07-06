@@ -124,6 +124,7 @@ export default function App() {
             <br />
             {rsvp.contactPerson} · {rsvp.contactPhone}
           </p>
+          <p className="footer-credit">{weddingConfig.music.credit}</p>
         </footer>
       </div>
 

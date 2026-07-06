@@ -1353,6 +1353,13 @@ button {
   line-height: 1.7;
 }
 
+.footer-credit {
+  margin-top: 1.4rem;
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+  color: rgba(154, 131, 104, 0.65);
+}
+
 /* ---- Sound toggle ------------------------------------------------------ */
 
 .sound-toggle {

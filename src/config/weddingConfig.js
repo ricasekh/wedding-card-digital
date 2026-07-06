@@ -8,7 +8,7 @@ export const weddingConfig = {
     brideShort: "Maleeha",
     groomShort: "Rasekh",
     hosts: "Mr. & Mrs. Mir Mohammad Yousuf",
-    monogram: "R · M",
+    monogram: "R&M",
     initials: ["R", "M"],
     hashtag: "#RasekhWedsMaleeha",
     weddingDate: "2026-10-04T12:00:00+05:30",
@@ -22,8 +22,10 @@ export const weddingConfig = {
   },
 
   music: {
-    title: "Romantic acoustic strings",
-    url: "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=romantic-wedding-acoustic-113824.mp3",
+    title: "Erik Satie — Gymnopédie No. 1",
+    // self-hosted so it works reliably (and offline) for every guest
+    url: `${baseUrl}audio/gymnopedie-no-1.mp3`,
+    credit: "Music: Gymnopédie No. 1, perf. Kevin MacLeod (incompetech.com) · CC BY 4.0",
   },
 
   venues: [

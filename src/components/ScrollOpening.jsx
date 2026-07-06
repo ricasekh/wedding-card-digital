@@ -58,7 +58,11 @@ export function ScrollOpening({ onSealTap, onOpenedChange }) {
       const shellF = ease(seg(p, 0.6, 0.88)); // envelope falls away
       const fade = ease(seg(p, 0.88, 0.995)); // stage dissolve into the hero
 
-      flapRef.current.style.transform = `rotateX(${-178 * f}deg)`;
+      const flap = flapRef.current;
+      flap.style.transform = `rotateX(${-178 * f}deg)`;
+      // past 90° the flap lies folded back behind the envelope, so the
+      // card must rise OVER it, not through it
+      flap.style.zIndex = f > 0.5 ? '0' : '5';
 
       // the card rises, then glides back to screen centre while it grows —
       // one continuous move toward the viewer, no jump
