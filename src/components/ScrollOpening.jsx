@@ -32,6 +32,7 @@ export function ScrollOpening({ onSealTap, onOpenedChange }) {
   const lastP = useRef(0);
   const forceP = useRef(null); // dev-only scrub override, see below
   const prevPhase = useRef(null); // { f, r, z } from the previous frame
+  const lastRustle = useRef(0); // throttle for WebAudio calls
   const openedRef = useRef(false);
   const cancelAuto = useRef(null);
   const { couple } = weddingConfig;
@@ -54,7 +55,10 @@ export function ScrollOpening({ onSealTap, onOpenedChange }) {
       raf = 0;
       const wrap = wrapRef.current;
       if (!wrap) return;
-      const vh = window.innerHeight;
+      // use the sticky stage's actual height rather than dynamic innerHeight
+      // so that Android address-bar changes don't skew the animation math
+      const stage = stageRef.current;
+      const vh = stage ? stage.offsetHeight : window.innerHeight;
       const range = Math.max(wrap.offsetHeight - vh, 1);
       const p =
         forceP.current ?? clamp01((window.scrollY - wrap.offsetTop) / range);
@@ -122,7 +126,6 @@ export function ScrollOpening({ onSealTap, onOpenedChange }) {
       add.style.opacity = String(1 - seg(p, 0.03, 0.14));
       add.style.transform = `translateY(${-34 * seg(p, 0.03, 0.14)}px)`;
 
-      const stage = stageRef.current;
       stage.style.opacity = String(1 - fade);
       stage.style.visibility = fade >= 1 ? 'hidden' : 'visible';
       stage.style.pointerEvents = p > 0.6 ? 'none' : 'auto';
@@ -134,7 +137,11 @@ export function ScrollOpening({ onSealTap, onOpenedChange }) {
         if (prev.f > 0.02 && f <= 0.02) sealCrack(0.4); // re-sealing on the way up
         const activity =
           Math.abs(f - prev.f) * 2 + Math.abs(r - prev.r) * 2.5 + Math.abs(z - prev.z);
-        if (activity > 0.0008) paperRustle(Math.min(0.4, activity * 6));
+        const now = performance.now();
+        if (activity > 0.0008 && now - lastRustle.current > 40) {
+          lastRustle.current = now;
+          paperRustle(Math.min(0.4, activity * 6));
+        }
       }
       prevPhase.current = { f, r, z };
 
@@ -192,7 +199,8 @@ export function ScrollOpening({ onSealTap, onOpenedChange }) {
     cancelAuto.current?.();
     const wrap = wrapRef.current;
     const from = window.scrollY;
-    const to = wrap.offsetTop + wrap.offsetHeight - window.innerHeight;
+    const stageH = stageRef.current ? stageRef.current.offsetHeight : window.innerHeight;
+    const to = wrap.offsetTop + wrap.offsetHeight - stageH;
     const dur = 7000;
     const t0 = performance.now();
     let raf = 0;

@@ -37,7 +37,7 @@ export const weddingConfig = {
       googleMapsUrl: "https://maps.google.com/?q=Hotel+Northern+Residency+Sanat+Nagar+Srinagar",
       appleMapsUrl: "https://maps.apple.com/?q=Hotel+Northern+Residency+Sanat+Nagar+Srinagar",
       image: `${baseUrl}images/ceremony_venue.jpg`,
-      note: "Buffet: gentlemen 12–3 PM · ladies from 4 PM",
+      note: "Lunch: gentlemen 12–3 PM · ladies from 4 PM",
     },
   ],
 
@@ -57,8 +57,8 @@ export const weddingConfig = {
     {
       time: "4:00",
       meridiem: "PM",
-      title: "Feast for Ladies",
-      description: "Buffet served for the ladies from four in the afternoon.",
+      title: "Ladies Lunch",
+      description: "Lunch served for the ladies from four in the afternoon.",
     },
   ],
 

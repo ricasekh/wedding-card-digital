@@ -15,7 +15,7 @@ import { Heart } from 'lucide-react';
 
 export default function App() {
   const [opened, setOpened] = useState(false); // envelope scrubbed fully open
-  const [musicOn, setMusicOn] = useState(false); // set on seal tap (user gesture)
+  const [musicOn, setMusicOn] = useState(true); // music on by default
   const [isRSVPOpen, setRSVPOpen] = useState(false);
   const { couple, rsvp } = weddingConfig;
 
@@ -34,16 +34,22 @@ export default function App() {
     root.setProperty('--emboss', `url(${base}images/emboss-pattern.svg)`);
   }, []);
 
-  // WebAudio needs one real user gesture before paper sounds may play
+  // WebAudio needs one real user gesture before paper sounds & music may play
   useEffect(() => {
     const unlock = () => unlockAudio();
-    window.addEventListener('pointerdown', unlock, { passive: true });
-    window.addEventListener('touchstart', unlock, { passive: true });
-    window.addEventListener('keydown', unlock);
+    const gestures = ['touchstart', 'touchend', 'pointerdown', 'pointerup', 'click', 'keydown', 'scroll', 'wheel'];
+    const options = { passive: true, capture: true };
+
+    gestures.forEach((evt) => {
+      window.addEventListener(evt, unlock, options);
+      document.addEventListener(evt, unlock, options);
+    });
+
     return () => {
-      window.removeEventListener('pointerdown', unlock);
-      window.removeEventListener('touchstart', unlock);
-      window.removeEventListener('keydown', unlock);
+      gestures.forEach((evt) => {
+        window.removeEventListener(evt, unlock, options);
+        document.removeEventListener(evt, unlock, options);
+      });
     };
   }, []);
 
@@ -136,7 +142,7 @@ export default function App() {
         </footer>
       </div>
 
-      <SoundToggle autoPlay={musicOn} />
+      <SoundToggle phase={opened ? 'on' : musicOn ? 'warm' : 'idle'} />
       <RSVPModal isOpen={isRSVPOpen} onClose={() => setRSVPOpen(false)} />
     </>
   );

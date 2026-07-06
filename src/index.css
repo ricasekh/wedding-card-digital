@@ -52,6 +52,7 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  overscroll-behavior-y: none;
 }
 
 body {
@@ -223,8 +224,10 @@ button {
 
 .opening {
   position: relative;
-  height: 500vh; /* long runway: the opening should feel unhurried */
-  margin-bottom: -100vh; /* hero slides in beneath the final frames */
+  height: 500vh;
+  height: 500lvh; /* use large viewport height to prevent gap when address bar hides */
+  margin-bottom: -100vh;
+  margin-bottom: -100lvh;
   z-index: 30;
 }
 
@@ -232,7 +235,7 @@ button {
   position: sticky;
   top: 0;
   height: 100vh;
-  height: 100svh;
+  height: 100lvh;
   overflow: hidden;
 }
 
