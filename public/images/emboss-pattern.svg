@@ -2,7 +2,7 @@
   <!-- Embossed chinar damask: each motif drawn twice, light copy up-left,
        dark copy down-right, reading as relief pressed into the paper -->
   <defs>
-    <path id="leaf" d="M0 -50 L8 -28 L26 -36 L20 -14 L42 -18 L30 0 L48 8 L28 14 L34 34 L12 26 L6 44 L2 44 L2 58 L-2 58 L-2 44 L-6 44 L-12 26 L-34 34 L-28 14 L-48 8 L-30 0 L-42 -18 L-20 -14 L-26 -36 L-8 -28 Z"/>
+    <path id="leaf" d="M 0 -55 L 4 -35 L 2 -30 L 10 -25 L 8 -5 L 35 -25 L 30 -15 L 42 -10 L 32 5 L 45 20 L 35 22 L 38 30 L 25 30 L 20 35 L 10 25 L 2 35 C 2 50, 6 65, 4 72 C 2 75, 0 75, -1 72 C 0 65, -2 50, -2 35 L -10 25 L -20 35 L -25 30 L -38 30 L -35 22 L -45 20 L -32 5 L -42 -10 L -30 -15 L -35 -25 L -8 -5 L -10 -25 L -2 -30 L -4 -35 Z"/>
   </defs>
   <g fill="none" stroke-width="5" stroke-linejoin="round">
     <g transform="translate(45,45) scale(0.30)">

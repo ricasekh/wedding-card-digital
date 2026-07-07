@@ -195,6 +195,7 @@ export function ScrollOpening({ onSealTap, onOpenedChange }) {
   // Tapping the seal plays the whole film: a slow, cinematic auto-scroll
   // (~7s) that the guest can interrupt at any moment by scrolling
   const tapSeal = () => {
+    if (navigator.vibrate) navigator.vibrate(50);
     onSealTap?.();
     cancelAuto.current?.();
     const wrap = wrapRef.current;
@@ -259,9 +260,6 @@ export function ScrollOpening({ onSealTap, onOpenedChange }) {
                   </div>
 
                   <div className="env-pocket env-fall" />
-                  <div className="env-front-script env-fall">
-                    requests the pleasure of your company
-                  </div>
                   <div className="env-flap-shadow env-fall" ref={flapShadowRef} />
                   <div className="env-flap-shadow-open env-fall" ref={flapShadowOpenRef} />
 
@@ -285,7 +283,7 @@ export function ScrollOpening({ onSealTap, onOpenedChange }) {
           </div>
 
           <div className="env-hint" ref={hintRef}>
-            <span className="small-caps">Scroll to open</span>
+            <span className="small-caps">Tap or scroll to open</span>
           </div>
         </div>
       </div>

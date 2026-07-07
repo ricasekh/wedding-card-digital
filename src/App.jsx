@@ -62,11 +62,11 @@ export default function App() {
 
     const tick = () => {
       raf = 0;
-      const mid = window.innerHeight / 2;
       for (const el of els) {
         const frame = el.parentElement.getBoundingClientRect();
         if (frame.bottom < -120 || frame.top > window.innerHeight + 120) continue;
-        const drift = (frame.top + frame.height / 2 - mid) * -parseFloat(el.dataset.parallax || 0.1);
+        // Rely purely on frame.top to avoid jumping when mobile address bar hides
+        const drift = frame.top * -parseFloat(el.dataset.parallax || 0.1);
         el.style.transform = `translateY(${drift.toFixed(1)}px) scale(1.14)`;
       }
     };

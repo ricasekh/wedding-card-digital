@@ -53,6 +53,7 @@ html {
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   overscroll-behavior-y: none;
+  background-color: #ecdfc8; /* prevent white flash at bottom */
 }
 
 body {
@@ -74,6 +75,7 @@ img {
 button {
   font-family: inherit;
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
 ::selection {
@@ -498,6 +500,7 @@ button {
   font-size: clamp(1.05rem, 3.4vw, 1.45rem);
   color: rgba(92, 74, 56, 0.62);
   pointer-events: none;
+  padding: 0 0.4em; /* prevent left swash of 'r' from clipping */
 }
 
 .env-pocket::before,
