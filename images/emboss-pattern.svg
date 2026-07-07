@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180" viewBox="0 0 180 180">
+  <!-- Embossed chinar damask: each motif drawn twice, light copy up-left,
+       dark copy down-right, reading as relief pressed into the paper -->
+  <defs>
+    <path id="leaf" d="M 0 -55 L 4 -35 L 2 -30 L 10 -25 L 8 -5 L 35 -25 L 30 -15 L 42 -10 L 32 5 L 45 20 L 35 22 L 38 30 L 25 30 L 20 35 L 10 25 L 2 35 C 2 50, 6 65, 4 72 C 2 75, 0 75, -1 72 C 0 65, -2 50, -2 35 L -10 25 L -20 35 L -25 30 L -38 30 L -35 22 L -45 20 L -32 5 L -42 -10 L -30 -15 L -35 -25 L -8 -5 L -10 -25 L -2 -30 L -4 -35 Z"/>
+  </defs>
+  <g fill="none" stroke-width="5" stroke-linejoin="round">
+    <g transform="translate(45,45) scale(0.30)">
+      <use href="#leaf" stroke="#fffdf5" stroke-opacity="0.55" transform="translate(-2.5,-2.5)"/>
+      <use href="#leaf" stroke="#6f5322" stroke-opacity="0.28" transform="translate(2.5,2.5)"/>
+    </g>
+    <g transform="translate(135,135) scale(0.30) rotate(180)">
+      <use href="#leaf" stroke="#fffdf5" stroke-opacity="0.55" transform="translate(-2.5,-2.5)"/>
+      <use href="#leaf" stroke="#6f5322" stroke-opacity="0.28" transform="translate(2.5,2.5)"/>
+    </g>
+    <g transform="translate(135,45) scale(0.13) rotate(45)">
+      <use href="#leaf" stroke="#fffdf5" stroke-opacity="0.4" transform="translate(-4,-4)"/>
+      <use href="#leaf" stroke="#6f5322" stroke-opacity="0.2" transform="translate(4,4)"/>
+    </g>
+    <g transform="translate(45,135) scale(0.13) rotate(-45)">
+      <use href="#leaf" stroke="#fffdf5" stroke-opacity="0.4" transform="translate(-4,-4)"/>
+      <use href="#leaf" stroke="#6f5322" stroke-opacity="0.2" transform="translate(4,4)"/>
+    </g>
+  </g>
+</svg>
