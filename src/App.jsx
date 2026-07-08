@@ -105,7 +105,6 @@ export default function App() {
           <Story />
           <Schedule />
           <Venues />
-          <DressCode />
 
           <section className="section" id="rsvp">
             <div className="container">
@@ -120,7 +119,6 @@ export default function App() {
                   <Heart size={13} strokeWidth={2.2} />
                   Confirm RSVP
                 </button>
-                <p className="rsvp-deadline">Before {rsvp.deadline}</p>
               </Reveal>
             </div>
           </section>
